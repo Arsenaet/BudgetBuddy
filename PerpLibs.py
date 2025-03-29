@@ -4,7 +4,7 @@ import requests
 import os
 
 load_dotenv()
-def PostRequest():
+def PerpRequest(query):
     url = "https://api.perplexity.ai/chat/completions"
 
     payload = {
@@ -16,7 +16,7 @@ def PostRequest():
             },
             {
                 "role": "user",
-                "content": "How many stars are there in our galaxy?"
+                "content": f"{query}"
             }
         ],
         "max_tokens": 123,
@@ -38,10 +38,11 @@ def PostRequest():
     response = requests.request("POST", url, json=payload, headers=headers).json()
 
     #see docs for parsing usage
-    print(response)
     print(response["choices"][0]["message"]["content"])
+    return(response)
+    
 
-PostRequest()
+
 
 
 
