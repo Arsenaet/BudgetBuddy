@@ -6,49 +6,45 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-50">
-    <header class="bg-white shadow fixed w-full z-10">
-        <!--the Entire Navbar-->
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-    
-            <!--the entire title-->
-            <div class="flex items-center">
-    
-                <!--the icon placeholder-->
-                <div class="bg-green-500 text-white rounded-full w-10 h-10 flex items-center justify-center">
-                    <span class="font-bold">
-                        BB
-                    </span>
-                </div>
-    
-                <h1 class="ml-3 text-2xl font-bold text-green-500">
-                    Budget Buddy
-                </h1>
+<header class="bg-white shadow fixed w-full z-10 top-0">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="flex items-center">
+            <div class="bg-green-500 text-white rounded-full w-10 h-10 flex items-center justify-center">
+                <span class="font-bold">BB</span>
             </div>
-    
-            <!--the rest of the Navbar-->
-            <nav class="flex space-x-4">
-                <a class="text-gray-600 flex items-center" href="dashboard.html">
-                    <!--the icon for the dashboard page-->
-                    <i class="fas fa-home mr-1"></i> Dashboard
-                </a>
-                <a class="text-gray-600 flex items-center" href="expenses.html">
-                    <!--the icon for the expenses page-->
-                    <i class="fas fa-wallet mr-1"></i> Expenses
-                </a>
-                <a class="text-gray-600 flex items-center" href="insights.html">
-                    <!--the icon for the insights page-->
-                    <i class="fas fa-chart-line mr-1"></i> Insights
-                </a>
-                <a class="text-green-500 font-semibold flex items-center" href="categories.html">
-                    <!--the icon for the categories page-->
-                    <i class="fas fa-list-ul mr-1"></i> Categories
-                </a>
-            </nav>
+            <h1 class="ml-3 text-2xl font-bold text-green-500">Budget Buddy</h1>
         </div>
-    </header>
-<main class="container mx-auto px-4 py-8">
+        <nav class="hidden md:flex space-x-4">
+            <a class="text-gray-600 flex items-center" href="dashboard.html">
+                <i class="fas fa-home mr-1"></i> Dashboard
+            </a>
+            <a class="text-gray-600 flex items-center" href="expenses.html">
+                <i class="fas fa-wallet mr-1"></i> Expenses
+            </a>
+            <a class="text-gray-600 flex items-center" href="insights.html">
+                <i class="fas fa-chart-line mr-1"></i> Insights
+            </a>
+            <a class="text-green-500 font-semibold flex items-center" href="categories.html">
+                <i class="fas fa-list-ul mr-1"></i> Categories
+            </a>
+        </nav>
+        <div class="md:hidden">
+            <button id="menu-button" class="text-gray-600 focus:outline-none">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden">
+        <a href="dashboard.html" class="block px-4 py-2 text-gray-600 hover:text-black">Dashboard</a>
+        <a href="expenses.html" class="block px-4 py-2 text-gray-600 hover:text-black">Expenses</a>
+        <a href="insights.html" class="block px-4 py-2 text-gray-600 hover:text-black">Insights</a>
+        <a href="categories.html" class="block px-4 py-2 text-green-600 hover:text-green-800">Categories</a>
+    </div>
+</header>
+<main class="container mx-auto px-4 py-8 pt-20">
     <h1 class="text-3xl font-semibold mb-4">Categories</h1>
     <p class="text-gray-600 mb-8">Organize and track your spending by category</p>
     <section class="mb-8 border-2 border-gray-200 rounded-lg p-4">
@@ -79,7 +75,6 @@
                     <span class="font-semibold">Transportation</span>
                 </div>
             </div>
-
             <div class="border-2 border-yellow-500 rounded-lg p-4 flex items-center justify-center hover:bg-yellow-100">
                 <div class="text-center">
                     <div class="bg-yellow-500 text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-2">
@@ -88,7 +83,6 @@
                     <span class="font-semibold">Shopping</span>
                 </div>
             </div>
-
             <div class="border-2 border-pink-500 rounded-lg p-4 flex items-center justify-center hover:bg-pink-100">
                 <div class="text-center">
                     <div class="bg-pink-500 text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-2">
@@ -97,7 +91,6 @@
                     <span class="font-semibold">Home</span>
                 </div>
             </div>
-
             <div class="border-2 border-gray-500 rounded-lg p-4 flex items-center justify-center hover:bg-gray-100">
                 <div class="text-center">
                     <div class="bg-gray-500 text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-2">
@@ -128,7 +121,7 @@
         <h2 class="text-xl font-semibold mb-4">Category Comparison</h2>
         <p class="text-gray-600 mb-4">Compare spending across different categories</p>
         <div class="bg-white p-4 rounded-lg shadow">
-            <img src="https://placehold.co/600x400" alt="Bar chart comparing spending across different categories" class="w-full h-auto"/>
+            <canvas id="categoryChart" class="w-full h-auto"></canvas>
         </div>
     </section>
 </main>
@@ -137,6 +130,59 @@
         var menu = document.getElementById('mobile-menu');
         menu.classList.toggle('hidden');
     });
+
+    // Example data fetching function
+    async function fetchData() {
+        // Replace this with your actual data fetching logic
+        return {
+            labels: ['Food & Dining', 'Education', 'Healthcare', 'Utilities', 'Shopping', 'Transportation', 'Entertainment'],
+            data: [200, 150, 100, 80, 60, 50, 30]
+        };
+    }
+
+    async function renderChart() {
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        const chartData = await fetchData();
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Spending',
+                    data: chartData.data,
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 159, 64, 0.2)',
+                        'rgba(201, 203, 207, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    renderChart();
 </script>
 </body>
 </html>

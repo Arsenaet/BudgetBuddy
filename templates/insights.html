@@ -6,6 +6,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-50">
     <header class="bg-white shadow fixed w-full z-10">
@@ -28,7 +29,7 @@
             </div>
     
             <!--the rest of the Navbar-->
-            <nav class="flex space-x-4">
+            <nav class="hidden md:flex space-x-4">
                 <a class="text-gray-600 flex items-center" href="dashboard.html">
                     <!--the icon for the dashboard page-->
                     <i class="fas fa-home mr-1"></i> Dashboard
@@ -46,16 +47,27 @@
                     <i class="fas fa-list-ul mr-1"></i> Categories
                 </a>
             </nav>
+            <div class="md:hidden">
+                <button id="menu-toggle" class="text-gray-600 focus:outline-none">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="dashboard.html" class="block px-4 py-2 text-gray-600 hover:text-black">Dashboard</a>
+            <a href="expenses.html" class="block px-4 py-2 text-gray-600 hover:text-black">Expenses</a>
+            <a href="insights.html" class="block px-4 py-2 text-green-600 hover:text-green-800">Insights</a>
+            <a href="categories.html" class="block px-4 py-2 text-gray-600 hover:text-black">Categories</a>
         </div>
     </header>
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-4 py-8 pt-20">
         <h1 class="text-3xl font-semibold mb-2">Insights</h1>
         <p class="text-gray-600 mb-8">Smart analysis of your spending habits</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div class="bg-white p-6 rounded-lg shadow">
                 <h2 class="text-xl font-semibold mb-4">Spending by Category</h2>
                 <p class="text-gray-600 mb-4">Your expense distribution</p>
-                <img src="https://placehold.co/300x300" alt="Pie chart showing spending by category" class="mx-auto mb-4">
+                <canvas id="categoryPieChart" class="mx-auto mb-4" style="max-width: 300px;"></canvas>
                 <ul class="text-gray-600 space-y-2">
                     <li><span class="inline-block w-4 h-4 bg-green-500 rounded-full mr-2"></span> Food & Dining: $203.00</li>
                     <li><span class="inline-block w-4 h-4 bg-purple-500 rounded-full mr-2"></span> Entertainment: $47.74</li>
@@ -69,17 +81,17 @@
             <div class="bg-white p-6 rounded-lg shadow">
                 <h2 class="text-xl font-semibold mb-4">Monthly Budget</h2>
                 <p class="text-gray-600 mb-4">Your spending progress for March</p>
-                <div class="text-3xl font-semibold text-green-600 mb-2">$977.38 of $2000.00</div>
+                <div class="text-3xl font-semibold text-green-600 mb-2" id="budget-spent">$977.38 of $2000.00</div>
                 <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                    <div class="bg-green-500 h-2.5 rounded-full" style="width: 49%"></div>
+                    <div class="bg-green-500 h-2.5 rounded-full" id="budget-bar"></div>
                 </div>
                 <div class="flex justify-between items-center mb-4">
                     <div>
-                        <div class="text-2xl font-semibold">$1022.62</div>
+                        <div class="text-2xl font-semibold" id="budget-remaining">$1022.62</div>
                         <div class="text-gray-600">Remaining</div>
                     </div>
                     <div>
-                        <div class="text-2xl font-semibold">$340.87</div>
+                        <div class="text-2xl font-semibold" id="daily-budget">$340.87</div>
                         <div class="text-gray-600">Daily Budget</div>
                     </div>
                 </div>
@@ -89,7 +101,7 @@
         <div class="bg-white p-6 rounded-lg shadow mb-8">
             <h2 class="text-xl font-semibold mb-4">Spending Trend</h2>
             <p class="text-gray-600 mb-4">How your spending has evolved this month</p>
-            <img src="https://placehold.co/600x300" alt="Line chart showing spending trend over the month" class="mx-auto">
+            <canvas id="spendingTrendChart" class="mx-auto" style="max-width: 100%; height: 300px;"></canvas>
         </div>
         <div class="bg-white p-6 rounded-lg shadow mb-8">
             <h2 class="text-xl font-semibold mb-4">AI Insights</h2>
@@ -125,6 +137,134 @@
         document.getElementById('menu-toggle').addEventListener('click', function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
+
+        // Example data fetching function for pie chart
+        async function fetchPieChartData() {
+            // Replace this with your actual data fetching logic
+            return {
+                labels: ['Food & Dining', 'Entertainment', 'Transportation', 'Shopping', 'Utilities', 'Healthcare', 'Education'],
+                data: [203.00, 47.74, 122.70, 128.75, 135.20, 140.00, 199.99]
+            };
+        }
+
+        // Example data fetching function for line chart
+        async function fetchLineChartData() {
+            // Replace this with your actual data fetching logic
+            return {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                data: [500, 700, 800, 977.38]
+            };
+        }
+
+        // Example data fetching function for budget data
+        async function fetchBudgetData() {
+            // Replace this with your actual data fetching logic
+            return {
+                spent: 977.38,
+                total: 2000.00,
+                remaining: 1022.62,
+                daily: 340.87
+            };
+        }
+
+        async function renderPieChart() {
+            const ctx = document.getElementById('categoryPieChart').getContext('2d');
+            const chartData = await fetchPieChartData();
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Spending by Category',
+                        data: chartData.data,
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(255, 159, 64, 0.2)',
+                            'rgba(201, 203, 207, 0.2)',
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(201, 203, 207, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function renderLineChart() {
+            const ctx = document.getElementById('spendingTrendChart').getContext('2d');
+            const chartData = await fetchLineChartData();
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Spending Trend',
+                        data: chartData.data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        async function renderBudgetData() {
+            const budgetData = await fetchBudgetData();
+            const spentPercentage = (budgetData.spent / budgetData.total) * 100;
+
+            document.getElementById('budget-spent').textContent = `$${budgetData.spent.toFixed(2)} of $${budgetData.total.toFixed(2)}`;
+            document.getElementById('budget-remaining').textContent = `$${budgetData.remaining.toFixed(2)}`;
+            document.getElementById('daily-budget').textContent = `$${budgetData.daily.toFixed(2)}`;
+            document.getElementById('budget-bar').style.width = `${spentPercentage}%`;
+        }
+
+        renderPieChart();
+        renderLineChart();
+        renderBudgetData();
     </script>
 </body>
 </html>
