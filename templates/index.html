@@ -7,28 +7,62 @@
 {% block body %}
 <div class="content">
     <h1 style="text-align: center">Budget Buddy</h1>
-    <h4 style="text-align: center">This is a perplexity prompt box!</h4>
-
-    <div class="form" style="text-align: center;">
-        <form id="queryForm">
-            <label for="userQuery">Enter your query:</label>
-            <input type="text" id="userQuery" name="userQuery" placeholder="Type your query here..." required>
-            <button type="submit">Submit</button>
+    
+    <!-- Todo Items Table -->
+    <div class="table-container">
+        <h2>Budget Items</h2>
+        <table>
+            <tr>
+                <th>Item</th>
+                <th>Cost</th>
+                <th>Added</th>
+                <th>Actions</th>
+            </tr>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.item }}</td>
+                <td>${{ item.cost }}</td>
+                <td>{{ item.date_created.date() }}</td>
+                <td>
+                    <a href="/delete/{{ item.id }}">Delete</a>
+                    <a href="/update/{{ item.id }}">Update</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    
+    <!-- Add New Item Form -->
+    <div class="form-container">
+        <h3>Add Item</h3>
+        <form action="/" method="POST">
+            <input type="text" name="item" placeholder="Item name" required>
+            <input type="number" name="cost" placeholder="Cost" required>
+            <input type="submit" value="Add Item">
         </form>
     </div>
-  
-    <h4 style="text-align: center">Prompt Result:</h4>
-    <div id="promptresult-container" style="text-align: left; max-height: max-content; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-left: 60%; margin-right: 20px;">
-        <div id="promptresult" style="text-align: left; display: block; word-wrap: break-word;">{{ prompt_result if prompt_result else "No result yet." }}</div>
+    
+    <!-- Perplexity Query Section -->
+    <div class="perplexity-section">
+        <h3>Ask Budget Question</h3>
+        <form id="queryForm">
+            <input type="text" id="userQuery" name="userQuery" placeholder="Type your budget question here..." required>
+            <button type="submit">Ask</button>
+        </form>
+        
+        <div id="promptresult-container">
+            <h4>Answer:</h4>
+            <div id="promptresult">{{ prompt_result if prompt_result else "No result yet." }}</div>
+        </div>
     </div>
 </div>
 
 <script>
     document.getElementById("queryForm").addEventListener("submit", function(event) {
-        event.preventDefault(); // Prevent default form submission behavior
-    
+        event.preventDefault();
+        
         const userQuery = document.getElementById("userQuery").value;
-    
+        
         fetch("/submit", {
             method: "POST",
             headers: {
@@ -38,11 +72,7 @@
         })
         .then(response => response.json())
         .then(data => {
-            const promptResultContainer = document.getElementById("promptresult");
-            promptResultContainer.innerHTML = data.prompt_result || "Error processing query.";
-    
-            // Scroll to the bottom of the container to show the result if it's large
-            promptResultContainer.scrollTop = promptResultContainer.scrollHeight;
+            document.getElementById("promptresult").innerHTML = data.prompt_result || "Error processing query.";
         })
         .catch(error => {
             console.error("Error:", error);
@@ -51,4 +81,59 @@
     });
 </script>
 
+<style>
+    .content {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    
+    table, th, td {
+        border: 1px solid #ddd;
+    }
+    
+    th, td {
+        padding: 8px;
+        text-align: left;
+    }
+    
+    th {
+        background-color: #f2f2f2;
+    }
+    
+    .form-container, .perplexity-section {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    
+    input[type="text"], input[type="number"] {
+        padding: 8px;
+        margin: 5px;
+        width: 70%;
+    }
+    
+    input[type="submit"], button {
+        padding: 8px 15px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    
+    #promptresult-container {
+        margin-top: 15px;
+        padding: 10px;
+        border: 1px solid #eee;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+</style>
 {% endblock %}

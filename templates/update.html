@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Update Item</title>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1>Update Item</h1>
+
+    <div class="form">
+        <form action="/update/{{ item.id }}" method="POST">
+            <label for="item">Item Name:</label>
+            <input type="text" name="item" id="item" value="{{ item.item }}" required>
+            
+            <label for="cost">Cost:</label>
+            <input type="number" name="cost" id="cost" value="{{ item.cost }}" required>
+            
+            <input type="submit" value="Update">
+        </form>
+    </div>
+</div>
+
+<style>
+    .content {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .form {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 5px;
+    }
+    
+    label {
+        display: block;
+        margin: 10px 0 5px;
+        font-weight: bold;
+    }
+    
+    input[type="text"], input[type="number"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    
+    input[type="submit"] {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    
+    input[type="submit"]:hover {
+        background-color: #45a049;
+    }
+</style>
+{% endblock %} 
