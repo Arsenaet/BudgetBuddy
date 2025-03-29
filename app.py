@@ -1,7 +1,6 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import logging
-import os
-from PerpLibs import Request
+from PerpLibs import Request, Textonly
 from waitress import serve
 
 app = Flask(__name__)
@@ -18,19 +17,19 @@ def internal_error(error):
 
 @app.route("/submit", methods=["POST"])
 def submit():
-    user_query = request.form.get("userQuery")  # Retrieve the input from the form
     try:
+        # Retrieve the input from the JSON body
+        user_query = request.json.get("userQuery")
         # Process the query using Perplexity API
         response = Request(user_query)
-        prompt_result = (response)  # Extract text from API response
+        prompt_result = Textonly(response)  # Extract text from API response
         print(prompt_result)
         print(response["choices"][0]["message"]["content"])
     except Exception as e:
         prompt_result = f"Error: {str(e)}"  # Handle errors gracefully
 
-    # Render the index page with the result
-    return render_template("index.html", promptresult=prompt_result["choices"][0]["message"]["content"])
-
+    # Return the result as JSON
+    return jsonify({'prompt_result': prompt_result})
 
 if __name__ == "__main__":
     # Configure logging

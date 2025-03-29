@@ -35,7 +35,7 @@ def Request(query):
         "web_search_options": {"search_context_size": "high"}
     }
     headers = {
-        "Authorization": f"Bearer {os.getenv("PERPLEXITY_API_KEY")}",
+        "Authorization": f"Bearer {os.getenv('PERPLEXITY_API_KEY')}",
         "Content-Type": "application/json"
     }
 
