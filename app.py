@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 import logging
 from PerpLibs import Request, Textonly
+from markdown import markdown
 from waitress import serve
+import os
+import re
 
 app = Flask(__name__)
 
@@ -23,13 +26,17 @@ def submit():
         # Process the query using Perplexity API
         response = Request(user_query)
         prompt_result = Textonly(response)  # Extract text from API response
-        print(prompt_result)
-        print(response["choices"][0]["message"]["content"])
+        
+        prompt_result = re.sub(r'\[\d+\]', '', prompt_result)
+
+        # Convert markdown to HTML
+        html_result = markdown(prompt_result)
+
     except Exception as e:
-        prompt_result = f"Error: {str(e)}"  # Handle errors gracefully
+        html_result = f"Error: {str(e)}"  # Handle errors gracefully
 
     # Return the result as JSON
-    return jsonify({'prompt_result': prompt_result})
+    return jsonify({'prompt_result': html_result})
 
 if __name__ == "__main__":
     # Configure logging

@@ -23,7 +23,7 @@ def Request(query):
                 "content": f"{query}"
             }
         ],
-        "max_tokens": 123,
+        "max_tokens": 2048,
         "temperature": 0.2,
         "top_p": 0.9,
         "return_images": False,

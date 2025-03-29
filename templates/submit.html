@@ -36,11 +36,11 @@ document.getElementById("queryForm").addEventListener("submit", function(event) 
     })
     .then(response => response.json())
     .then(data => {
-        document.getElementById("promptresult").innerText = data.prompt_result || "Error processing query.";
+        document.getElementById("promptresult").innerHTML = data.prompt_result || "Error processing query.";
     })
     .catch(error => {
         console.error("Error:", error);
-        document.getElementById("promptresult").innerText = "An error occurred.";
+        document.getElementById("promptresult").innerHTML = "An error occurred.";
     });
 });
 </script>
