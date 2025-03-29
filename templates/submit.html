@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Budget Buddy</title>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1 style="text-align: center">Budget Buddy</h1>
+    <h4 style="text-align: center">This is a perplexity prompt box!</h4>
+
+    <div class="form">
+        <form id="queryForm">
+            <label for="userQuery">Enter your query:</label>
+            <input type="text" id="userQuery" name="userQuery" placeholder="Type your query here..." required>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <h4 style="text-align: center">Prompt Result:</h4>
+    <p id="promptresult"></p>
+</div>
+
+<script>
+document.getElementById("queryForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // Prevent default form submission behavior
+
+    const userQuery = document.getElementById("userQuery").value;
+
+    fetch("/submit", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ userQuery: userQuery })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("promptresult").innerText = data.prompt_result || "Error processing query.";
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        document.getElementById("promptresult").innerText = "An error occurred.";
+    });
+});
+</script>
+{% endblock %}
