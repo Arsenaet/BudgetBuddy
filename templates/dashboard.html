@@ -1,0 +1,287 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>
+        Budget Buddy
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-100 text-gray-900">
+<header class="bg-white shadow fixed w-full z-10">
+    <!--the Entire Navbar-->
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+
+        <!--the entire title-->
+        <div class="flex items-center">
+
+            <!--the icon placeholder-->
+            <div class="bg-green-500 text-white rounded-full w-10 h-10 flex items-center justify-center">
+                <span class="font-bold">
+                    BB
+                </span>
+            </div>
+
+            <h1 class="ml-3 text-2xl font-bold text-green-500">
+                Budget Buddy
+            </h1>
+        </div>
+
+        <!--the rest of the Navbar-->
+        <nav class="flex space-x-4">
+            <a class="text-green-500 font-semibold flex items-center" href="#">
+                <!--the icon for the dashboard page-->
+                <i class="fas fa-home mr-1"></i> Dashboard
+            </a>
+            <a class="text-gray-600 flex items-center" href="#">
+                <!--the icon for the expenses page-->
+                <i class="fas fa-file-invoice-dollar mr-1"></i> Expenses
+            </a>
+            <a class="text-gray-600 flex items-center" href="#">
+                <!--the icon for the insights page-->
+                <i class="fas fa-chart-line mr-1"></i> Insights
+            </a>
+            <a class="text-gray-600 flex items-center" href="#">
+                <!--the icon for the categories page-->
+                <i class="fas fa-list-ul mr-1"></i> Categories
+            </a>
+        </nav>
+    </div>
+</header>
+
+
+<main class="container mx-auto px-4 py-24">
+    <h2 class="text-3xl font-bold">
+        Welcome to Budget Buddy
+    </h2>
+    <p class="text-gray-600">
+        Your personal finance tracker
+    </p>
+
+    <!--the first partition for the dashboard page-->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+
+        <!--the LHS of the first partition for the dashboard page-->
+        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+            <h3 class="text-xl font-bold">
+                Monthly Budget
+            </h3>
+            <p class="text-gray-600">
+                Your spending progress for March
+            </p>
+            <div class="mt-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">
+                        $977.38 of $2000.00
+                    </span>
+                    <span class="text-gray-600">
+                        49%
+                    </span>
+                </div>
+                <!--this is the placeholder for the loader on the LHS of the first partition for the dashboard page-->
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                    <div class="bg-green-500 h-2.5 rounded-full" style="width: 49%">
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <p class="text-gray-600">
+                        Remaining
+                    </p>
+                    <p class="text-2xl font-bold">
+                        $1022.62
+                    </p>
+                </div>
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <p class="text-gray-600">
+                        Daily Budget
+                    </p>
+                    <p class="text-2xl font-bold">
+                        $340.87
+                    </p>
+                </div>
+            </div>
+            <p class="mt-4 text-gray-600">
+                vs. Last Month:
+                <span class="text-green-500">
+                    0.0% less spending
+                </span>
+            </p>
+        </div>
+
+        <!--the RHS of the first partition for the dashboard page-->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-xl font-bold">
+                Quick Add
+            </h3>
+            <button class="mt-4 bg-green-500 text-white px-4 py-2 rounded-lg">
+                Add New Expense
+            </button>
+        </div>
+    </div>
+
+    <!--the second partition for the dashboard page-->
+    <!--the LHS of the second partition for the dashboard page-->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-xl font-bold">
+                Spending by Category
+            </h3>
+            <p class="text-gray-600">
+                Your expense distribution
+            </p>
+
+            <!--this is the a placeholder for the bar chart that will eventually be made-->
+            <div class="mt-4">
+                <img alt="Pie chart showing spending by category" height="300" src="https://placehold.co/300x300" width="300"/>
+            </div>
+            <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 inline-block mr-2">
+                    </span>
+                    Food &amp; Dining: $203.00
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-purple-500 inline-block mr-2">
+                    </span>
+                    Entertainment: $47.74
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-blue-500 inline-block mr-2">
+                    </span>
+                    Education: $199.99
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-orange-500 inline-block mr-2">
+                    </span>
+                    Shopping: $128.75
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-red-500 inline-block mr-2">
+                    </span>
+                    Healthcare: $140.00
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-yellow-500 inline-block mr-2">
+                    </span>
+                    Transportation: $122.70
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-gray-500 inline-block mr-2">
+                    </span>
+                    Utilities: $135.20
+                </div>
+            </div>
+        </div>
+
+        <!--this is the RHS of the second partition for the dashboard page and the first place we will use the API-->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-xl font-bold">
+                AI Insights
+            </h3>
+            <p class="text-gray-600">
+                Smart analysis of your spending habits
+            </p>
+            <div class="mt-4">
+                <div class="flex items-start">
+                    <span class="w-3 h-3 bg-red-500 inline-block mr-2 mt-1">
+                    </span>
+                    <div>
+                        <p class="font-bold">
+                            Highest Spending Category
+                        </p>
+                        <p class="text-gray-600">
+                            Your highest expense category is Food &amp; Dining. You've spent $203.00 in this category.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-start mt-4">
+                    <span class="w-3 h-3 bg-green-500 inline-block mr-2 mt-1">
+                    </span>
+                    <div>
+                        <p class="font-bold">
+                            Savings Opportunity
+                        </p>
+                        <p class="text-gray-600">
+                            Based on your spending patterns, you could save $146.61 by reducing discretionary expenses by 15%.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--the last partition for the dashboard page-->
+    <!--we will prbably implement database storage to aid us keep track of recent transactions and such-->
+    <div class="bg-white p-6 rounded-lg shadow mt-6">
+        <div class="flex justify-between items-center">
+            <h3 class="text-xl font-bold">
+                Recent Transactions
+            </h3>
+            <a class="text-green-500" href="#">
+                View All
+            </a>
+        </div>
+        <p class="text-gray-600">
+            Your latest expenses
+        </p>
+        <div class="mt-4">
+            <div class="flex justify-between items-center py-2 border-b">
+                <div class="flex items-center">
+                    <i class="fas fa-receipt text-green-500 mr-2">
+                    </i>
+                    <div>
+                        <p>
+                            Grocery shopping at Whole Foods
+                        </p>
+                        <p class="text-gray-600 text-sm">
+                            Mar 23, 2025
+                        </p>
+                    </div>
+                </div>
+                <p class="font-bold">
+                    $87.30
+                </p>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b">
+                <div class="flex items-center">
+                    <i class="fas fa-utensils text-green-500 mr-2">
+                    </i>
+                    <div>
+                        <p>
+                            Dinner at Italian restaurant
+                        </p>
+                        <p class="text-gray-600 text-sm">
+                            Mar 22, 2025
+                        </p>
+                    </div>
+                </div>
+                <p class="font-bold">
+                    $42.25
+                </p>
+            </div>
+            <div class="flex justify-between items-center py-2">
+                <div class="flex items-center">
+                    <i class="fas fa-gas-pump text-green-500 mr-2">
+                    </i>
+                    <div>
+                        <p>
+                            Gas fill-up
+                        </p>
+                        <p class="text-gray-600 text-sm">
+                            Mar 20, 2025
+                        </p>
+                    </div>
+                </div>
+                <p class="font-bold">
+                    $64.50
+                </p>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
