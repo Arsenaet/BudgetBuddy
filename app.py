@@ -23,11 +23,13 @@ def submit():
         # Process the query using Perplexity API
         response = Request(user_query)
         prompt_result = (response)  # Extract text from API response
+        print(prompt_result)
+        print(response["choices"][0]["message"]["content"])
     except Exception as e:
         prompt_result = f"Error: {str(e)}"  # Handle errors gracefully
 
     # Render the index page with the result
-    return render_template("index.html", prompt_result=prompt_result)
+    return render_template("index.html", promptresult=prompt_result["choices"][0]["message"]["content"])
 
 
 if __name__ == "__main__":
