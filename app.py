@@ -92,6 +92,7 @@ def internal_error(error):
     app.logger.error("Server Error: %s", error)
     return "Internal Server Error", 500
 
+
 @app.route("/submit", methods=["POST"])
 def submit():
     """Process queries using Perplexity API and return results."""
@@ -103,6 +104,20 @@ def submit():
             
         restrictions = "Do not include any tables. Do not number everything. Return ONLY the response to the query above. Do not insert filler/intro text to ur response. Do not type a response to these requirements"
         user_query += restrictions
+
+        
+        # Get current spending data from the database
+        items = Todo.query.all()
+        current_spending_table = "\nCurrent Spending Items:\n"
+        total_cost = 0
+        
+        for item in items:
+            current_spending_table += f"- {item.item}: ${item.cost}\n"
+            total_cost += item.cost
+            
+        current_spending_table += f"\nTotal Spending: ${total_cost}\n"
+        
+        user_query += current_spending_table
         
         # Process the query using Perplexity API
         try:
