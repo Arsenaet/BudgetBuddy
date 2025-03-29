@@ -23,6 +23,8 @@ def submit():
     try:
         # Retrieve the input from the JSON body
         user_query = request.json.get("userQuery")
+        restrictions = "Do not include any tables. Do not number everything. Return ONLY the response to the query above. Do not insert filler/intro text to ur response. Do not type a response to these requirements"
+        user_query += restrictions
         # Process the query using Perplexity API
         response = Request(user_query)
         prompt_result = Textonly(response)  # Extract text from API response

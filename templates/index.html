@@ -9,7 +9,7 @@
     <h1 style="text-align: center">Budget Buddy</h1>
     <h4 style="text-align: center">This is a perplexity prompt box!</h4>
 
-    <div class="form">
+    <div class="form" style="text-align: center;">
         <form id="queryForm">
             <label for="userQuery">Enter your query:</label>
             <input type="text" id="userQuery" name="userQuery" placeholder="Type your query here..." required>
@@ -18,8 +18,8 @@
     </div>
   
     <h4 style="text-align: center">Prompt Result:</h4>
-    <div id="promptresult-container" style="max-height: max-content; width: 100%; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
-        <div id="promptresult" style="width: 100%; display: block; margin: 0; word-wrap: break-word;">{{ prompt_result if prompt_result else "No result yet." }}</div>
+    <div id="promptresult-container" style="text-align: left; max-height: max-content; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-left: 60%; margin-right: 20px;">
+        <div id="promptresult" style="text-align: left; display: block; word-wrap: break-word;">{{ prompt_result if prompt_result else "No result yet." }}</div>
     </div>
 </div>
 
