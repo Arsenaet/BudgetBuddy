@@ -58,7 +58,7 @@
             </div>
             <h1 class="ml-3 text-2xl font-bold text-green-500">Budget Buddy</h1>
         </div>
-        <nav class="flex space-x-4 items-center">
+        <nav class="hidden md:flex space-x-4 items-center">
             <a class="text-green-500 font-semibold flex items-center" href="/dashboard">
                 <i class="fas fa-home mr-1"></i> Dashboard
             </a>
@@ -92,6 +92,32 @@
             </button>
         </div>
     </div>
+    <!-- Mobile menu -->
+    <nav id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark-800">
+        <div class="px-4 py-2 text-gray-600 dark:text-dark-400">
+            <span>Welcome, {{ username }}</span>
+        </div>
+        <a href="/dashboard" class="block px-4 py-2 text-green-500 font-semibold dark:text-green-400">
+            <i class="fas fa-home mr-1"></i> Dashboard
+        </a>
+        <a href="/expenses" class="block px-4 py-2 text-gray-600 hover:text-green-500 dark:text-dark-400 dark:hover:text-green-400">
+            <i class="fas fa-wallet mr-1"></i> Expenses
+        </a>
+        <a href="/insights" class="block px-4 py-2 text-gray-600 hover:text-green-500 dark:text-dark-400 dark:hover:text-green-400">
+            <i class="fas fa-chart-line mr-1"></i> Insights
+        </a>
+        <a href="/categories" class="block px-4 py-2 text-gray-600 hover:text-green-500 dark:text-dark-400 dark:hover:text-green-400">
+            <i class="fas fa-list-ul mr-1"></i> Categories
+        </a>
+        <button id="mobile-theme-toggle" class="block w-full text-left px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-dark-400 dark:hover:text-dark-200">
+            <i class="fas fa-moon mr-1 dark:hidden"></i>
+            <i class="fas fa-sun mr-1 hidden dark:block"></i>
+            Toggle Theme
+        </button>
+        <a href="/logout" class="block px-4 py-2 text-gray-600 hover:text-red-500 dark:text-dark-400 dark:hover:text-red-400 border-t border-gray-200 dark:border-dark-700">
+            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+        </a>
+    </nav>
 </header>
 
 <main class="container mx-auto px-4 py-24">
@@ -292,81 +318,76 @@
     </div>
 </main>
 
-<nav id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark-800">
-    <div class="px-4 py-2 text-sm text-gray-600 dark:text-dark-400 border-b border-gray-200 dark:border-dark-700">
-        Hi, {{ username }}
-    </div>
-    <a href="/dashboard" class="block text-green-500 font-semibold px-4 py-2 hover:bg-gray-50 dark:hover:bg-dark-700">
-        <i class="fas fa-home mr-1"></i> Dashboard
-    </a>
-    <a href="/expenses" class="block text-gray-600 hover:text-green-500 px-4 py-2 hover:bg-gray-50 dark:text-dark-400 dark:hover:bg-dark-700 dark:hover:text-green-400">
-        <i class="fas fa-wallet mr-1"></i> Expenses
-    </a>
-    <a href="/insights" class="block text-gray-600 hover:text-green-500 px-4 py-2 hover:bg-gray-50 dark:text-dark-400 dark:hover:bg-dark-700 dark:hover:text-green-400">
-        <i class="fas fa-chart-line mr-1"></i> Insights
-    </a>
-    <a href="/categories" class="block text-gray-600 hover:text-green-500 px-4 py-2 hover:bg-gray-50 dark:text-dark-400 dark:hover:bg-dark-700 dark:hover:text-green-400">
-        <i class="fas fa-list-ul mr-1"></i> Categories
-    </a>
-    <button id="mobile-theme-toggle" class="block w-full text-left text-gray-600 hover:text-gray-800 px-4 py-2 hover:bg-gray-50 dark:text-dark-400 dark:hover:bg-dark-700 dark:hover:text-dark-200">
-        <i class="fas fa-moon mr-1 dark:hidden"></i>
-        <i class="fas fa-sun mr-1 hidden dark:block"></i>
-        Toggle Theme
-    </button>
-    <a href="/logout" class="block text-gray-600 hover:text-red-500 px-4 py-2 hover:bg-gray-50 dark:text-dark-400 dark:hover:bg-dark-700 dark:hover:text-red-400 border-t border-gray-200 dark:border-dark-700">
-        <i class="fas fa-sign-out-alt mr-1"></i> Logout
-    </a>
-</nav>
-
 <script>
-// Theme toggle functionality
-const themeToggle = document.getElementById('theme-toggle');
-const html = document.documentElement;
-
-// Check for saved user preference or use system preference
-const userTheme = localStorage.getItem('theme');
-const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-// Initial theme check
-const themeCheck = () => {
-    if (userTheme === 'dark' || (!userTheme && systemTheme)) {
-        html.classList.add('dark');
-        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-    } else {
-        html.classList.remove('dark');
-        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-    }
-};
-
-// Manual theme switch
-const themeSwitch = () => {
-    if (html.classList.contains('dark')) {
-        html.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-    } else {
-        html.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-    }
-};
-
-// Event listener for theme toggle button
-themeToggle.addEventListener('click', themeSwitch);
-
-// Invoke theme check on initial load
-themeCheck();
-
-// Chart rendering
+// Set up charts and budget visualization when the document is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Apply budget bar width from data attribute
+    // Initialize the mobile menu toggle
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+        document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+    
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('theme-toggle');
+    const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
+    const html = document.documentElement;
+
+    // Check for saved theme preference
+    const userTheme = localStorage.getItem('theme');
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    // Initial theme check
+    const themeCheck = () => {
+        if (userTheme === 'dark' || (!userTheme && systemTheme)) {
+            html.classList.add('dark');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            if (mobileThemeToggle) {
+                mobileThemeToggle.innerHTML = '<i class="fas fa-sun mr-1"></i> Toggle Theme';
+            }
+        } else {
+            html.classList.remove('dark');
+            themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            if (mobileThemeToggle) {
+                mobileThemeToggle.innerHTML = '<i class="fas fa-moon mr-1"></i> Toggle Theme';
+            }
+        }
+    };
+
+    // Manual theme switch
+    const themeSwitch = () => {
+        if (html.classList.contains('dark')) {
+            html.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            if (mobileThemeToggle) {
+                mobileThemeToggle.innerHTML = '<i class="fas fa-moon mr-1"></i> Toggle Theme';
+            }
+        } else {
+            html.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            if (mobileThemeToggle) {
+                mobileThemeToggle.innerHTML = '<i class="fas fa-sun mr-1"></i> Toggle Theme';
+            }
+        }
+    };
+
+    // Event listeners for theme toggle buttons
+    themeToggle.addEventListener('click', themeSwitch);
+    if (mobileThemeToggle) {
+        mobileThemeToggle.addEventListener('click', themeSwitch);
+    }
+
+    // Invoke theme check
+    themeCheck();
+    
+    // Budget progress bar
     const budgetBar = document.getElementById('budget-bar');
     if (budgetBar) {
-        const percentage = budgetBar.getAttribute('data-percentage');
+        const percentage = parseFloat(budgetBar.getAttribute('data-percentage'));
         budgetBar.style.width = Math.min(100, percentage) + '%';
         
-        // Change color based on percentage
-        if (parseFloat(percentage) > 100) {
+        // Change color if over budget
+        if (percentage > 100) {
             budgetBar.classList.remove('bg-green-500');
             budgetBar.classList.add('bg-red-500');
         }
