@@ -40,4 +40,5 @@ Thumbs.db
 
 # Perplexity API
 perplexity_api_key.txt
-
+#keeps the google client secret
+client_secret.json

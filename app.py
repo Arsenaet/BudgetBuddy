@@ -4,18 +4,29 @@ import logging
 import re
 from datetime import datetime
 
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, session, url_for
 import sqlalchemy
 from flask_sqlalchemy import SQLAlchemy
 from markdown import markdown
 from waitress import serve
 from PerpLibs import Request, Textonly
+import dotenv
+import os
+
+import google.oauth2.credentials
+import google_auth_oauthlib.flow
+import googleapiclient.discovery
+dotenv.load_dotenv()
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
+app.secret_key = os.getenv('ServerSecret')
+
+
 
 class Todo(db.Model):
+    #User 
     id = db.Column(db.Integer, primary_key=True)
     item = db.Column(db.String(200), nullable=False)  # Category
     name = db.Column(db.String(200), nullable=False, default="Unnamed Item")  # Item name
@@ -24,14 +35,23 @@ class Todo(db.Model):
 
     def __repr__(self):
         return f'<Item {self.id}: {self.name}>'
-
 class Budget(db.Model):
+    #User
     id = db.Column(db.Integer, primary_key=True)
     monthly_amount = db.Column(db.Float, nullable=False, default=2000.0)
     date_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     def __repr__(self):
         return f'<Budget ${self.monthly_amount}>'
+    
+def credentials_to_dict(credentials):
+    return{'token' : credentials.token,
+           'refresh_token': credentials.refresh_token,
+           'token_uri': credentials.token_uri,
+           'client_id': credentials.client_id,
+           'client_secret' : credentials.client_secret,
+           'granted_scopes': credentials.granted_scopes
+           }
 
 @app.route("/", methods=['GET'])
 @app.route("/index", methods=['GET'])
@@ -39,7 +59,35 @@ def index():
     """Redirect to dashboard."""
     return redirect('/dashboard')
 
+@app.route("/googleauth")
+def login():
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('client_secret.json', scopes=['openid'])
+    flow.redirect_uri = url_for('oauth2callback', _external=True)
+    authorization_url, state = flow.authorization_url(
+    access_type='offline',
+    include_granted_scopes='true',
+    prompt='consent'
+)
+    print(state)
+    session['state'] = state
+    return redirect(authorization_url)
 
+@app.route('/oauth2callback')
+def oauth2callback():
+    state = session['state']
+    print(1)
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file( 'client_secret.json', scopes=['openid'], state=state)
+    flow.redirect_uri = url_for('oauth2callback', _external=True)
+    print(2)
+    AuthResponse = request.url
+    flow.fetch_token(authorization_response=AuthResponse)
+
+    credentials = flow.credentials
+
+    credentials = credentials_to_dict(credentials)
+    session['credentials'] = credentials
+
+    return redirect("/")
 @app.route("/dashboard", methods=['GET', 'POST'])
 def dashboard():
     """Display the main dashboard with budget overview."""
