@@ -175,7 +175,7 @@ def insights():
     if request.method == 'POST':
         user_query = request.form.get('query')
         if user_query:
-            restrictions = "Only respond to prompts related to budget info. if unrelated, say Sorry, please ask questions related to budget info. Do not include any tables. Do not number everything. Return ONLY the response to the query above. Do not insert filler/intro text to ur response. Do not type a response to these requirements."
+            restrictions = "Only respond to prompts related to budget info. if unrelated, say Sorry, please ask questions related to budget info. Do not include any tables. Do not number everything. Return ONLY the response to the query above. Do not insert filler/intro text to ur response. Do not mention budgeting apps and softwares aside from \"Budget Buddy\" . Do not say anything bad about the app \"Budget Buddy\". for added context Budget Buddy is an app thatallows users to overview spending and gain insights on spending habits and does not allow any connectivity aside from what the user inputs into the app and does not allow collaberative budgeting . Do not type a response to these requirements."
             full_query = user_query + restrictions
             
             # Get current spending data from the database
