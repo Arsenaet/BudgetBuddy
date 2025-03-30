@@ -17,12 +17,13 @@ db = SQLAlchemy(app)
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    item = db.Column(db.String(200), nullable=False)
+    item = db.Column(db.String(200), nullable=False)  # Category
+    name = db.Column(db.String(200), nullable=False, default="Unnamed Item")  # Item name
     cost = db.Column(db.Integer, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now)
 
     def __repr__(self):
-        return f'<Item {self.id}>'
+        return f'<Item {self.id}: {self.name}>'
 
 
 
@@ -37,12 +38,13 @@ def index():
 def dashboard():
     """Display the main dashboard with budget overview."""
     if request.method == 'POST':
-        item_name = request.form['item']
+        item_category = request.form['item']
+        item_name = request.form.get('name', 'Unnamed Item')
         item_cost = request.form.get('cost', 0)
         
         try:
             item_cost = int(item_cost)
-            new_item = Todo(item=item_name, cost=item_cost)
+            new_item = Todo(item=item_category, name=item_name, cost=item_cost)
             
             db.session.add(new_item)
             db.session.commit()
@@ -79,12 +81,13 @@ def dashboard():
 def expenses():
     """Display the expenses management page and handle new expenses."""
     if request.method == 'POST':
-        item_name = request.form['item']
+        item_category = request.form['item']
+        item_name = request.form.get('name', 'Unnamed Item')
         item_cost = request.form.get('cost', 0)
         
         try:
             item_cost = int(item_cost)
-            new_item = Todo(item=item_name, cost=item_cost)
+            new_item = Todo(item=item_category, name=item_name, cost=item_cost)
             
             db.session.add(new_item)
             db.session.commit()
@@ -114,7 +117,8 @@ def categories():
             category_data[item.item] = item.cost
     
     return render_template('categories.html', 
-                          category_data=category_data)
+                          category_data=category_data,
+                          items=items)
 
 
 @app.route('/delete/<int:id>')
@@ -138,6 +142,7 @@ def update(id):
 
     if request.method == 'POST':
         item.item = request.form['item']
+        item.name = request.form.get('name', 'Unnamed Item')
         item.cost = int(request.form.get('cost', 0))
 
         try:
@@ -259,10 +264,77 @@ def submit():
         app.logger.error("Request processing error: %s", e)
         return jsonify({'prompt_result': f"Error processing request: {str(e)}"}), 500
 
+
+@app.route('/migrate_db', methods=['GET'])
+def migrate_db():
+    """Add 'name' field to existing items that don't have it."""
+    try:
+        # First check if the name column exists
+        column_exists = False
+        try:
+            # Try to query a single item with the name column
+            with db.engine.connect() as conn:
+                conn.execute(sqlalchemy.text("SELECT name FROM todo LIMIT 1"))
+            column_exists = True
+        except:
+            column_exists = False
+        
+        if not column_exists:
+            # We need to add the column - this requires recreating the table in SQLite
+            return "Database structure needs to be updated. Please restart the application to apply schema changes."
+        
+        # If we got here, the column exists, so just populate any NULL values
+        items = Todo.query.all()
+        for item in items:
+            if not item.name:
+                item.name = f"{item.item} item"
+        
+        db.session.commit()
+        return "Database migration completed successfully."
+    except Exception as e:
+        app.logger.error(f"Migration error: {str(e)}")
+        return f"Migration failed: {str(e)}"
+
 # Create database tables
 with app.app_context():
-    db.create_all()
-    app.logger.info("Database tables created")
+    # Need to drop and recreate tables to add the name field
+    try:
+        # First try to back up existing data
+        items_backup = []
+        try:
+            # Use raw SQL to bypass the ORM which would try to load the non-existent name column
+            with db.engine.connect() as conn:
+                result = conn.execute(sqlalchemy.text("SELECT id, item, cost, date_created FROM todo"))
+                for row in result:
+                    items_backup.append({
+                        'item': row[1],
+                        'cost': row[2],
+                        'date_created': row[3]
+                    })
+            app.logger.info(f"Backed up {len(items_backup)} items")
+        except Exception as e:
+            app.logger.warning(f"Could not back up data: {e}")
+        
+        # Drop and recreate tables
+        db.drop_all()
+        db.create_all()
+        
+        # Restore data with new name field
+        for item_data in items_backup:
+            new_item = Todo(
+                item=item_data['item'],
+                name=f"{item_data['item']} item",  # Default name based on category
+                cost=item_data['cost'],
+                date_created=item_data['date_created']
+            )
+            db.session.add(new_item)
+        
+        db.session.commit()
+        app.logger.info("Database tables recreated with name field")
+    except Exception as e:
+        db.create_all()
+        app.logger.error(f"Error recreating tables: {e}")
+        app.logger.info("Fresh database tables created")
 
 if __name__ == "__main__":
     # Configure logging

@@ -107,6 +107,10 @@
                     </select>
                 </div>
                 <div class="mb-4">
+                    <label class="block text-gray-700">Item Name</label>
+                    <input type="text" name="name" class="w-full border border-gray-300 rounded-lg p-2 mt-1" placeholder="e.g., Rent, Netflix, Groceries" required>
+                </div>
+                <div class="mb-4">
                     <label class="block text-gray-700">Cost</label>
                     <input type="number" name="cost" class="w-full border border-gray-300 rounded-lg p-2 mt-1" required>
                 </div>
@@ -125,7 +129,8 @@
                 <table class="w-full">
                     <thead>
                         <tr class="text-left text-gray-600">
-                            <th class="pb-2">Item</th>
+                            <th class="pb-2">Category</th>
+                            <th class="pb-2">Name</th>
                             <th class="pb-2">Cost</th>
                             <th class="pb-2">Date</th>
                             <th class="pb-2">Actions</th>
@@ -135,6 +140,7 @@
                         {% for item in items %}
                         <tr class="border-t border-gray-200">
                             <td class="py-4 px-2">{{ item.item }}</td>
+                            <td class="py-4 px-2">{{ item.name }}</td>
                             <td class="py-4 px-2">${{ item.cost }}</td>
                             <td class="py-4 px-2">{{ item.date_created.strftime('%b %d, %Y') }}</td>
                             <td class="py-4 px-2">
