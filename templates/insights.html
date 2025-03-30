@@ -85,15 +85,15 @@
             <div class="bg-white p-6 rounded-lg shadow">
                 <h2 class="text-xl font-semibold mb-4">Monthly Budget</h2>
                 <p class="text-gray-600 mb-4">Your current spending progress</p>
-                <div class="text-3xl font-semibold text-green-600 mb-2">${{ "%.2f"|format(total_spent) }} of $2000.00</div>
+                <div class="text-3xl font-semibold text-green-600 mb-2">${{ "%.2f"|format(total_spent) }} of ${{ "%.2f"|format(monthly_budget) }}</div>
                 <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
                     <div class="bg-green-500 h-2.5 rounded-full" 
                          id="insights-budget-bar" 
-                         data-percentage="{{ (total_spent / 2000) * 100 }}"></div>
+                         data-percentage="{{ (total_spent / monthly_budget) * 100 }}"></div>
                 </div>
                 <div class="flex justify-between items-center mb-4">
                     <div>
-                        <div class="text-2xl font-semibold">{{ "%.2f"|format(2000 - total_spent) }}</div>
+                        <div class="text-2xl font-semibold">{{ "%.2f"|format(monthly_budget - total_spent) }}</div>
                         <div class="text-gray-600">Remaining</div>
                     </div>
                     <div>
@@ -137,10 +137,10 @@
                     <div class="font-semibold">Budget Status</div>
                     <div class="text-gray-600">
                         {% if total_spent > 0 %}
-                            {% if total_spent > 2000 %}
-                            You are over budget by ${{ "%.2f"|format(total_spent - 2000) }}.
+                            {% if total_spent > monthly_budget %}
+                            You are over budget by ${{ "%.2f"|format(total_spent - monthly_budget) }}.
                             {% else %}
-                            You have ${{ "%.2f"|format(2000 - total_spent) }} remaining in your budget.
+                            You have ${{ "%.2f"|format(monthly_budget - total_spent) }} remaining in your budget.
                             {% endif %}
                         {% else %}
                         No spending data available yet.
@@ -152,13 +152,21 @@
         <div class="bg-white p-6 rounded-lg shadow mt-6">
             <h3 class="text-xl font-semibold mb-4">Ask Budget Buddy</h3>
             <p class="text-gray-600 mb-4">Have a question about your budget? Ask away!</p>
-            <form action="/insights" method="post" class="flex flex-col gap-2">
+            <form action="/insights" method="post" class="flex flex-col gap-2" id="aiQueryForm">
                 <input type="text" name="query" placeholder="e.g., How can I save more money?" class="border p-2 rounded">
-                <button type="submit" class="bg-blue-500 text-white p-2 rounded">Ask</button>
+                <button type="submit" class="bg-blue-500 text-white p-2 rounded flex justify-center items-center" id="submitButton">
+                    <span>Ask</span>
+                    <div class="ml-2 hidden" id="loadingSpinner">
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </button>
             </form>
             <div class="mt-4 p-4 border border-gray-200 rounded-lg">
                 <h4 class="font-semibold mb-2">Insights:</h4>
-                <div>{{ prompt_result|safe if prompt_result else "Ask a question about your budget." }}</div>
+                <div id="responseContainer">{{ prompt_result|safe if prompt_result else "Ask a question about your budget." }}</div>
             </div>
         </div>
     </main>
@@ -167,13 +175,29 @@
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
 
+        // Handle form submission and show loading spinner
+        document.getElementById('aiQueryForm').addEventListener('submit', function() {
+            // Show loading spinner
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            // Change button text
+            document.getElementById('submitButton').querySelector('span').textContent = 'Loading...';
+            // Disable the button to prevent multiple submissions
+            document.getElementById('submitButton').disabled = true;
+        });
+
         // Set up charts only if we have data
         document.addEventListener('DOMContentLoaded', function() {
             // Apply budget bar width from data attribute
             const budgetBar = document.getElementById('insights-budget-bar');
             if (budgetBar) {
                 const percentage = budgetBar.getAttribute('data-percentage');
-                budgetBar.style.width = percentage + '%';
+                budgetBar.style.width = Math.min(100, percentage) + '%';
+                
+                // Change color based on percentage
+                if (parseFloat(percentage) > 100) {
+                    budgetBar.classList.remove('bg-green-500');
+                    budgetBar.classList.add('bg-red-500');
+                }
             }
             
             // Set up pie chart

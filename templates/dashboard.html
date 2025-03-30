@@ -48,7 +48,7 @@
                     <span class="text-gray-600" id="budget-spent">${{ "%.2f"|format(total_spent) }} spent</span>
                     <span class="text-gray-600" id="budget-percentage">
                         {% if total_spent > 0 %}
-                            {% set percentage = (total_spent / 2000) * 100 %}
+                            {% set percentage = (total_spent / monthly_budget) * 100 %}
                             {{ percentage|round|int }}%
                         {% else %}
                             0%
@@ -59,13 +59,22 @@
                 <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2 relative overflow-hidden">
                     <div class="bg-green-500 h-2.5 rounded-full absolute top-0 left-0" 
                          id="budget-bar" 
-                         data-percentage="{{ (total_spent / 2000) * 100 }}"></div>
+                         data-percentage="{{ (total_spent / monthly_budget) * 100 }}"></div>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4 mt-4">
                 <div class="bg-gray-100 p-4 rounded-lg">
                     <p class="text-gray-600">Remaining</p>
-                    <p class="text-2xl font-bold" id="budget-remaining">${{ "%.2f"|format(2000 - total_spent) }}</p>
+                    <p class="text-2xl font-bold" id="budget-remaining">${{ "%.2f"|format(monthly_budget - total_spent) }}</p>
+                    <form action="/set_budget" method="POST" class="mt-2 flex flex-col">
+                        <div class="flex items-center">
+                            <input type="number" name="monthly_budget" value="{{ monthly_budget }}" step="0.01" min="0" required
+                                class="w-full border border-gray-300 rounded-lg py-1 px-2 mr-2 text-sm" placeholder="Set monthly budget">
+                            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-lg text-sm">
+                                Update
+                            </button>
+                        </div>
+                    </form>
                 </div>
                 <div class="bg-gray-100 p-4 rounded-lg">
                     <p class="text-gray-600">Total Items</p>
@@ -147,10 +156,10 @@
                         <p class="font-bold">Budget Status</p>
                         <p class="text-gray-600" id="savings-opportunity">
                             {% if total_spent > 0 %}
-                                {% if total_spent > 2000 %}
-                                    You are over budget by ${{ "%.2f"|format(total_spent - 2000) }}
+                                {% if total_spent > monthly_budget %}
+                                    You are over budget by ${{ "%.2f"|format(total_spent - monthly_budget) }}
                                 {% else %}
-                                    You have ${{ "%.2f"|format(2000 - total_spent) }} remaining in your budget
+                                    You have ${{ "%.2f"|format(monthly_budget - total_spent) }} remaining in your budget
                                 {% endif %}
                             {% else %}
                                 No spending data available
@@ -200,7 +209,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const budgetBar = document.getElementById('budget-bar');
     if (budgetBar) {
         const percentage = budgetBar.getAttribute('data-percentage');
-        budgetBar.style.width = percentage + '%';
+        budgetBar.style.width = Math.min(100, percentage) + '%';
+        
+        // Change color based on percentage
+        if (parseFloat(percentage) > 100) {
+            budgetBar.classList.remove('bg-green-500');
+            budgetBar.classList.add('bg-red-500');
+        }
     }
     
     const ctx = document.getElementById('categoryPieChart').getContext('2d');

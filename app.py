@@ -25,7 +25,13 @@ class Todo(db.Model):
     def __repr__(self):
         return f'<Item {self.id}: {self.name}>'
 
+class Budget(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    monthly_amount = db.Column(db.Float, nullable=False, default=2000.0)
+    date_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
+    def __repr__(self):
+        return f'<Budget ${self.monthly_amount}>'
 
 @app.route("/", methods=['GET'])
 @app.route("/index", methods=['GET'])
@@ -59,6 +65,10 @@ def dashboard():
     items = Todo.query.all()
     total_spent = sum(item.cost for item in items)
     
+    # Get current budget
+    budget = Budget.query.first()
+    monthly_budget = budget.monthly_amount if budget else 2000.0
+    
     # Calculate basic statistics
     category_data = {}
     for item in items:
@@ -74,7 +84,8 @@ def dashboard():
                           items=items,
                           recent_items=recent_items,
                           total_spent=total_spent,
-                          category_data=category_data)
+                          category_data=category_data,
+                          monthly_budget=monthly_budget)
 
 
 @app.route('/expenses', methods=['GET', 'POST'])
@@ -195,6 +206,10 @@ def insights():
     items = Todo.query.all()
     total_spent = sum(item.cost for item in items)
     
+    # Get current budget
+    budget = Budget.query.first()
+    monthly_budget = budget.monthly_amount if budget else 2000.0
+    
     # Categorize spending
     category_data = {}
     for item in items:
@@ -211,7 +226,8 @@ def insights():
                           total_spent=total_spent,
                           category_data=category_data,
                           highest_category=highest_category,
-                          prompt_result=prompt_result)
+                          prompt_result=prompt_result,
+                          monthly_budget=monthly_budget)
 
 
 @app.errorhandler(500)
@@ -294,6 +310,33 @@ def migrate_db():
     except Exception as e:
         app.logger.error(f"Migration error: {str(e)}")
         return f"Migration failed: {str(e)}"
+
+@app.route("/set_budget", methods=['POST'])
+def set_budget():
+    """Update the monthly budget amount."""
+    try:
+        new_budget = float(request.form.get('monthly_budget', 2000))
+        
+        # Get the current budget or create a new one if it doesn't exist
+        budget = Budget.query.first()
+        if budget:
+            budget.monthly_amount = new_budget
+        else:
+            budget = Budget(monthly_amount=new_budget)
+            db.session.add(budget)
+            
+        db.session.commit()
+        
+        # Redirect back to the referring page or dashboard if no referrer
+        referrer = request.referrer
+        if referrer:
+            return redirect(referrer)
+        return redirect('/dashboard')
+    except ValueError:
+        return "Please enter a valid number for the budget"
+    except Exception as e:
+        app.logger.error(f"Error setting budget: {e}")
+        return "An error occurred while setting the budget"
 
 # Create database tables
 with app.app_context():
