@@ -112,7 +112,7 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700">Cost</label>
-                    <input type="number" name="cost" class="w-full border border-gray-300 rounded-lg p-2 mt-1" required>
+                    <input type="number" name="cost" class="w-full border border-gray-300 rounded-lg p-2 mt-1" step="0.01" min="0" required>
                 </div>
                 <button type="submit" class="w-full bg-green-500 text-white rounded-lg p-2 mt-4">Add Item</button>
             </form>
@@ -129,8 +129,7 @@
                 <table class="w-full">
                     <thead>
                         <tr class="text-left text-gray-600">
-                            <th class="pb-2">Category</th>
-                            <th class="pb-2">Name</th>
+                            <th class="pb-2">Item</th>
                             <th class="pb-2">Cost</th>
                             <th class="pb-2">Date</th>
                             <th class="pb-2">Actions</th>
@@ -141,7 +140,7 @@
                         <tr class="border-t border-gray-200">
                             <td class="py-4 px-2">{{ item.item }}</td>
                             <td class="py-4 px-2">{{ item.name }}</td>
-                            <td class="py-4 px-2">${{ item.cost }}</td>
+                            <td class="py-4 px-2">${{ "%.2f"|format(item.cost) }}</td>
                             <td class="py-4 px-2">{{ item.date_created.strftime('%b %d, %Y') }}</td>
                             <td class="py-4 px-2">
                                 <a href="/update/{{ item.id }}" class="text-blue-500 hover:text-blue-700 mr-2">

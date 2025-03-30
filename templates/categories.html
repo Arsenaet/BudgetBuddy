@@ -63,7 +63,7 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-semibold">{{ category }}</h3>
-                        <p class="text-gray-600">Total: ${{ amount }}</p>
+                        <p class="text-gray-600">Total: ${{ "%.2f"|format(amount) }}</p>
                     </div>
                 </div>
                 
@@ -76,7 +76,7 @@
                                 {% set found = true %}
                                 <li class="py-2 flex justify-between">
                                     <span>{{ item.name }}</span>
-                                    <span class="font-medium">${{ item.cost }}</span>
+                                    <span class="font-medium">${{ "%.2f"|format(item.cost) }}</span>
                                 </li>
                             {% endif %}
                         {% endfor %}

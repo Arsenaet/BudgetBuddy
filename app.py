@@ -19,7 +19,7 @@ class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     item = db.Column(db.String(200), nullable=False)  # Category
     name = db.Column(db.String(200), nullable=False, default="Unnamed Item")  # Item name
-    cost = db.Column(db.Integer, nullable=False)
+    cost = db.Column(db.Float, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now)
 
     def __repr__(self):
@@ -43,7 +43,7 @@ def dashboard():
         item_cost = request.form.get('cost', 0)
         
         try:
-            item_cost = int(item_cost)
+            item_cost = float(item_cost)
             new_item = Todo(item=item_category, name=item_name, cost=item_cost)
             
             db.session.add(new_item)
@@ -86,7 +86,7 @@ def expenses():
         item_cost = request.form.get('cost', 0)
         
         try:
-            item_cost = int(item_cost)
+            item_cost = float(item_cost)
             new_item = Todo(item=item_category, name=item_name, cost=item_cost)
             
             db.session.add(new_item)
@@ -121,10 +121,10 @@ def categories():
                           items=items)
 
 
-@app.route('/delete/<int:id>')
-def delete(id):
+@app.route('/delete/<int:item_id>')
+def delete(item_id):
     """Delete a budget item from the database by its ID."""
-    item_to_delete = Todo.query.get_or_404(id)
+    item_to_delete = Todo.query.get_or_404(item_id)
 
     try:
         db.session.delete(item_to_delete)
@@ -135,15 +135,15 @@ def delete(id):
         return 'There was a problem deleting that item'
     
 
-@app.route('/update/<int:id>', methods=['GET', 'POST'])
-def update(id):
+@app.route('/update/<int:item_id>', methods=['GET', 'POST'])
+def update(item_id):
     """Update an existing budget item by its ID."""
-    item = Todo.query.get_or_404(id)
+    item = Todo.query.get_or_404(item_id)
 
     if request.method == 'POST':
         item.item = request.form['item']
         item.name = request.form.get('name', 'Unnamed Item')
-        item.cost = int(request.form.get('cost', 0))
+        item.cost = float(request.form.get('cost', 0))
 
         try:
             db.session.commit()

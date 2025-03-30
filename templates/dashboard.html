@@ -45,7 +45,7 @@
             <p class="text-gray-600">Your current spending</p>
             <div class="mt-4">
                 <div class="flex justify-between items-center">
-                    <span class="text-gray-600" id="budget-spent">${{ total_spent }} spent</span>
+                    <span class="text-gray-600" id="budget-spent">${{ "%.2f"|format(total_spent) }} spent</span>
                     <span class="text-gray-600" id="budget-percentage">
                         {% if total_spent > 0 %}
                             {% set percentage = (total_spent / 2000) * 100 %}
@@ -65,7 +65,7 @@
             <div class="grid grid-cols-2 gap-4 mt-4">
                 <div class="bg-gray-100 p-4 rounded-lg">
                     <p class="text-gray-600">Remaining</p>
-                    <p class="text-2xl font-bold" id="budget-remaining">${{ 2000 - total_spent }}</p>
+                    <p class="text-2xl font-bold" id="budget-remaining">${{ "%.2f"|format(2000 - total_spent) }}</p>
                 </div>
                 <div class="bg-gray-100 p-4 rounded-lg">
                     <p class="text-gray-600">Total Items</p>
@@ -105,7 +105,7 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700">Cost</label>
-                    <input type="number" name="cost" class="w-full border border-gray-300 rounded-lg p-2 mt-1" required>
+                    <input type="number" name="cost" class="w-full border border-gray-300 rounded-lg p-2 mt-1" step="0.01" min="0" required>
                 </div>
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
                     Add New Item
@@ -134,7 +134,7 @@
                         <p class="text-gray-600" id="highest-category">
                             {% if category_data %}
                                 {% set max_item = category_data|dictsort(by='value')|reverse|first %}
-                                Your highest expense is {{ max_item[0] }} with ${{ max_item[1] }}
+                                Your highest expense is {{ max_item[0] }} with ${{ "%.2f"|format(max_item[1]) }}
                             {% else %}
                                 No spending data available
                             {% endif %}
@@ -148,9 +148,9 @@
                         <p class="text-gray-600" id="savings-opportunity">
                             {% if total_spent > 0 %}
                                 {% if total_spent > 2000 %}
-                                    You are over budget by ${{ (total_spent - 2000)|round(2) }}
+                                    You are over budget by ${{ "%.2f"|format(total_spent - 2000) }}
                                 {% else %}
-                                    You have ${{ (2000 - total_spent)|round(2) }} remaining in your budget
+                                    You have ${{ "%.2f"|format(2000 - total_spent) }} remaining in your budget
                                 {% endif %}
                             {% else %}
                                 No spending data available
@@ -176,7 +176,6 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cost</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -184,12 +183,8 @@
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap">{{ item.item }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ item.name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${{ item.cost }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${{ "%.2f"|format(item.cost) }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ item.date_created.strftime('%b %d, %Y') }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="/update/{{ item.id }}" class="text-blue-600 hover:text-blue-900 mr-4">Edit</a>
-                            <a href="/delete/{{ item.id }}" class="text-red-600 hover:text-red-900">Delete</a>
-                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
