@@ -1,3 +1,5 @@
+![Alt text](readmeimages/BudgetBuddyLogo.png)
+
 # Budget Buddy!
 *Your buddy for budgeting*
 
