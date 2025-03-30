@@ -366,6 +366,79 @@ def set_budget():
         app.logger.error(f"Error setting budget: {e}")
         return "An error occurred while setting the budget"
 
+@app.route("/get_ai_insights", methods=['POST'])
+def get_ai_insights():
+    """Generate AI insights based on recent transactions and spending patterns."""
+    try:
+        # Get data from the request
+        category = request.json.get('category', None)
+        item_name = request.json.get('name', None)
+        cost = request.json.get('cost', None)
+        
+        # Get spending data
+        items = Todo.query.all()
+        total_spent = sum(item.cost for item in items)
+        
+        # Get current budget
+        budget = Budget.query.first()
+        monthly_budget = budget.monthly_amount if budget else 2000.0
+        
+        # Categorize spending
+        category_data = {}
+        for item in items:
+            if item.item in category_data:
+                category_data[item.item] += item.cost
+            else:
+                category_data[item.item] = item.cost
+        
+        # Build a query based on spending patterns
+        query = "Give 1-2 short personalized budget tips based on the following information:"
+        
+        # Include general budget status
+        query += f"\nTotal spending: ${total_spent:.2f}, Monthly budget: ${monthly_budget:.2f}"
+        
+        # Include category-specific information if available
+        if category and category in category_data:
+            query += f"\nSpending on {category}: ${category_data[category]:.2f}"
+            
+            # Find similar items in the same category
+            similar_items = [i for i in items if i.item == category]
+            if similar_items:
+                query += f"\nOther {category} expenses:"
+                for item in similar_items[:5]:  # Limit to 5 examples
+                    query += f"\n- {item.name}: ${item.cost:.2f}"
+        
+        # Include information about the newly added item if available
+        if category and item_name and cost:
+            query += f"\nNew expense just added: {item_name} (Category: {category}) for ${float(cost):.2f}"
+            
+        # Make sure the tips are focused on the specific category if available
+        if category:
+            query += f"\nFocus your tips on {category} spending and be specific."
+        
+        # Include restrictions to keep the response focused
+        restrictions = " Provide 1-2 concise, specific money-saving tips based on this spending pattern. Format as HTML with <p> tags. Keep each tip under 40 words. No introductions or conclusions. Don't mention 'Budget Buddy' directly. Focus only on actionable financial advice. Don't provide long-term financial planning advice. Focus only on immediate spending habits. DO NOT use markdown formatting like **bold** or *italic* in your response."
+        query += restrictions
+        
+        # Process the query using Perplexity API
+        response = Request(query)
+        insights = Textonly(response)
+        
+        # Clean up the response
+        insights = re.sub(r'\[\d+\]', '', insights)
+        
+        # Remove markdown asterisks if they appear
+        insights = re.sub(r'\*\*(.*?)\*\*', r'\1', insights)  # Remove bold markdown
+        insights = re.sub(r'\*(.*?)\*', r'\1', insights)      # Remove italic markdown
+        
+        # Convert any remaining markdown to HTML
+        insights = markdown(insights)
+        
+        return jsonify({'insights': insights})
+    except Exception as e:
+        app.logger.error(f"Error generating AI insights: {e}")
+        return jsonify({'insights': f"<p>Error generating insights: {str(e)}</p>"}), 500
+
 # Create database tables
 with app.app_context():
     # Need to drop and recreate tables to add the name field

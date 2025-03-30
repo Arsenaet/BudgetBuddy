@@ -154,6 +154,9 @@
                         <option value="Fitness">Fitness</option>
                         <option value="Pets">Pets</option>
                         <option value="Technology">Technology</option>
+                        <option value="Debt">Debt</option>
+                        <option value="Gifts/Donations">Gifts/Donations</option>
+                        <option value="Miscellaneous">Miscellaneous</option>
                     </select>
                 </div>
                 <div class="mb-4">
@@ -185,10 +188,10 @@
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow dark:bg-dark-800">
-            <h3 class="text-xl font-bold dark:text-dark-100">AI Insights</h3>
-            <p class="text-gray-600 dark:text-dark-400">Smart analysis of your spending habits</p>
-            <div class="mt-4">
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-xl font-bold">AI Insights</h3>
+            <p class="text-gray-600">Smart analysis of your spending habits</p>
+            <div class="mt-4" id="ai-insights-container">
                 <div class="flex items-start">
                     <span class="w-3 h-3 bg-red-500 inline-block mr-2 mt-1"></span>
                     <div>
@@ -219,6 +222,23 @@
                             {% endif %}
                         </p>
                     </div>
+                </div>
+                <div class="flex items-start mt-4" id="personalized-tips-container">
+                    <span class="w-3 h-3 bg-blue-500 inline-block mr-2 mt-1"></span>
+                    <div class="w-full">
+                        <div class="flex justify-between items-center">
+                            <p class="font-bold">Personalized Tips</p>
+                            <button id="refresh-insights" class="text-xs text-green-500 hover:text-green-700 flex items-center">
+                                <i class="fas fa-sync-alt mr-1"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="text-gray-600" id="personalized-tips">
+                            <p>Add expenses to get personalized tips</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-center mt-4" id="loading-container" style="display: none;">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
                 </div>
             </div>
         </div>
@@ -379,6 +399,100 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+    
+    // Handle form submission for Quick Add expense
+    const expenseForm = document.querySelector('form[action="/dashboard"]');
+    if (expenseForm) {
+        expenseForm.addEventListener('submit', function(event) {
+            // Get form data to pass to AI insights
+            const categorySelect = document.querySelector('select[name="item"]');
+            const nameInput = document.querySelector('input[name="name"]');
+            const costInput = document.querySelector('input[name="cost"]');
+            
+            // Store the values for later use after form submission
+            if (categorySelect && nameInput && costInput) {
+                localStorage.setItem('lastAddedCategory', categorySelect.value);
+                localStorage.setItem('lastAddedName', nameInput.value);
+                localStorage.setItem('lastAddedCost', costInput.value);
+                localStorage.setItem('shouldFetchInsights', 'true');
+            }
+        });
+    }
+    
+    // Check if we should fetch insights based on recently added item
+    const shouldFetchInsights = localStorage.getItem('shouldFetchInsights');
+    if (shouldFetchInsights === 'true') {
+        // Get stored values from localStorage
+        const category = localStorage.getItem('lastAddedCategory');
+        const name = localStorage.getItem('lastAddedName');
+        const cost = localStorage.getItem('lastAddedCost');
+        
+        // Clear the flag to prevent fetching again on page refresh
+        localStorage.setItem('shouldFetchInsights', 'false');
+        
+        // Fetch personalized insights based on the newly added expense
+        fetchAIInsights(category, name, cost);
+    }
+    
+    // Add event listener for refresh button
+    const refreshButton = document.getElementById('refresh-insights');
+    if (refreshButton) {
+        refreshButton.addEventListener('click', function() {
+            // Get general insights without specifying a particular expense
+            fetchAIInsights();
+        });
+    }
+    
+    // Function to fetch personalized AI insights
+    function fetchAIInsights(category, name, cost) {
+        // Show loading spinner
+        const loadingContainer = document.getElementById('loading-container');
+        if (loadingContainer) {
+            loadingContainer.style.display = 'flex';
+        }
+        
+        // Prepare data for the request
+        const requestData = {
+            category: category,
+            name: name,
+            cost: cost
+        };
+        
+        // Send request to the backend
+        fetch('/get_ai_insights', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Hide loading spinner
+            if (loadingContainer) {
+                loadingContainer.style.display = 'none';
+            }
+            
+            // Update the personalized tips container
+            const tipsContainer = document.getElementById('personalized-tips');
+            if (tipsContainer && data.insights) {
+                tipsContainer.innerHTML = data.insights;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching AI insights:', error);
+            // Hide loading spinner
+            if (loadingContainer) {
+                loadingContainer.style.display = 'none';
+            }
+            
+            // Show error message
+            const tipsContainer = document.getElementById('personalized-tips');
+            if (tipsContainer) {
+                tipsContainer.innerHTML = '<p>Unable to load personalized tips at this time.</p>';
+            }
+        });
+    }
 });
 </script>
 </body>
