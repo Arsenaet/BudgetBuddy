@@ -87,8 +87,9 @@ def dashboard():
     
     # Get today's date for the date input default
     today_date = datetime.now().strftime('%Y-%m-%d')
-
     
+    # Mock username for demo
+    username = "Demo User"
     
     return render_template('dashboard.html', 
                           items=items,
@@ -96,7 +97,8 @@ def dashboard():
                           total_spent=total_spent,
                           category_data=category_data,
                           monthly_budget=monthly_budget,
-                          today_date=today_date)
+                          today_date=today_date,
+                          username=username)
 
 
 @app.route('/expenses', methods=['GET', 'POST'])
@@ -131,7 +133,10 @@ def expenses():
     # Get today's date for the date input default
     today_date = datetime.now().strftime('%Y-%m-%d')
     
-    return render_template('expenses.html', items=items, today_date=today_date)
+    # Mock username for demo
+    username = "Demo User"
+    
+    return render_template('expenses.html', items=items, today_date=today_date, username=username)
 
 
 @app.route('/categories')
@@ -147,9 +152,13 @@ def categories():
         else:
             category_data[item.item] = item.cost
     
+    # Mock username for demo
+    username = "Demo User"
+    
     return render_template('categories.html', 
                           category_data=category_data,
-                          items=items)
+                          items=items,
+                          username=username)
 
 
 @app.route('/delete/<int:item_id>')
@@ -192,7 +201,9 @@ def update(item_id):
             return 'There was an issue updating your item'
 
     else:
-        return render_template('update.html', item=item)
+        # Mock username for demo
+        username = "Demo User"
+        return render_template('update.html', item=item, username=username)
 
 
 @app.route('/insights', methods=['GET', 'POST'])
@@ -249,13 +260,17 @@ def insights():
     # Find highest spending category
     highest_category = max(category_data.items(), key=lambda x: x[1]) if category_data else ("None", 0)
     
+    # Mock username for demo
+    username = "Demo User"
+    
     return render_template('insights.html', 
                           items=items,
                           total_spent=total_spent,
                           category_data=category_data,
                           highest_category=highest_category,
                           prompt_result=prompt_result,
-                          monthly_budget=monthly_budget)
+                          monthly_budget=monthly_budget,
+                          username=username)
 
 
 @app.errorhandler(500)
@@ -465,13 +480,13 @@ with app.app_context():
         
         # Restore data with new name field
         for item_data in items_backup:
-            new_item = Todo(
+            migrated_item = Todo(
                 item=item_data['item'],
                 name=f"{item_data['item']} item",  # Default name based on category
                 cost=item_data['cost'],
                 date_created=item_data['date_created']
             )
-            db.session.add(new_item)
+            db.session.add(migrated_item)
         
         db.session.commit()
         app.logger.info("Database tables recreated with name field")
