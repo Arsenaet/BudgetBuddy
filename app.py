@@ -349,7 +349,47 @@ def update(item_id):
 def insights():
     """Display budget insights and analysis."""
     prompt_result = None
+    user_id = session.get('user_id')
     
+    # Get user's items and budget
+    items = Todo.query.filter_by(user_id=user_id).order_by(Todo.date_created).all()
+    budget = Budget.query.filter_by(user_id=user_id).first()
+    monthly_budget = budget.monthly_amount if budget else 2000.0
+    total_spent = sum(item.cost for item in items)
+    
+    # --- NEW: Daily Spending Aggregation ---
+    daily_totals = {}
+    for item in items:
+        day = item.date_created.strftime('%Y-%m-%d')  # Group by date
+        if day not in daily_totals:
+            daily_totals[day] = 0
+        daily_totals[day] += item.cost
+    
+    # Sort days and prepare data for chart
+    sorted_days = sorted(daily_totals.keys())
+    daily_amounts = [daily_totals[day] for day in sorted_days]
+    
+    # Format dates for display (e.g., "Jan 01")
+    formatted_days = [datetime.strptime(day, '%Y-%m-%d').strftime('%b %d') for day in sorted_days]
+    
+    # --- NEW: Weekly/Monthly Aggregation Options ---
+    weekly_totals = {}
+    monthly_totals = {}
+    
+    for item in items:
+        # Weekly aggregation (Year-Week)
+        week_key = f"{item.date_created.strftime('%Y')}-W{item.date_created.strftime('%W')}"
+        if week_key not in weekly_totals:
+            weekly_totals[week_key] = 0
+        weekly_totals[week_key] += item.cost
+        
+        # Monthly aggregation (Year-Month)
+        month_key = item.date_created.strftime('%Y-%m')
+        if month_key not in monthly_totals:
+            monthly_totals[month_key] = 0
+        monthly_totals[month_key] += item.cost
+    
+    # --- Existing AI Query Handling ---
     if request.method == 'POST':
         user_query = request.form.get('query')
         if user_query:
@@ -357,8 +397,6 @@ def insights():
             full_query = user_query + restrictions
             
             # Get current spending data from the database
-            user_id = session.get('user_id')
-            items = Todo.query.filter_by(user_id=user_id).all()
             current_spending_table = "\nCurrent Spending Items:\n"
             total_cost = 0
             
@@ -382,14 +420,6 @@ def insights():
                 app.logger.error("Perplexity API error: %s", e)
                 prompt_result = f"Error connecting to AI service: {str(e)}"
     
-    user_id = session.get('user_id')
-    items = Todo.query.filter_by(user_id=user_id).all()
-    total_spent = sum(item.cost for item in items)
-    
-    # Get current budget - fetch user-specific budget
-    budget = Budget.query.filter_by(user_id=user_id).first()
-    monthly_budget = budget.monthly_amount if budget else 2000.0
-    
     # Categorize spending
     category_data = {}
     for item in items:
@@ -401,18 +431,25 @@ def insights():
     # Find highest spending category
     highest_category = max(category_data.items(), key=lambda x: x[1]) if category_data else ("None", 0)
     
-    # Get username from session
-    username = session.get('username', 'Demo User')
+    # Get recent items (last 5)
+    recent_items = items[-5:] if len(items) > 5 else items
     
     return render_template('insights.html', 
                           items=items,
+                          recent_items=recent_items,
                           total_spent=total_spent,
                           category_data=category_data,
                           highest_category=highest_category,
                           prompt_result=prompt_result,
                           monthly_budget=monthly_budget,
-                          username=username)
-
+                          username=session.get('username', 'Demo User'),
+                          # NEW: Chart data
+                          daily_labels=formatted_days,
+                          daily_amounts=daily_amounts,
+                          weekly_totals=weekly_totals,
+                          monthly_totals=monthly_totals,
+                          # For date display
+                          today_date=datetime.now().strftime('%Y-%m-%d'))
 
 @app.errorhandler(500)
 def internal_error(error):
