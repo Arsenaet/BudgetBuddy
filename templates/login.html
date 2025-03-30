@@ -259,10 +259,10 @@
                     </div>
                     
                     <!-- Other Social Logins -->
-                    <button type="button" class="w-full social-btn bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center">
+                    <button type="button" onclick="showComingSoon('Facebook')" class="w-full social-btn bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center">
                         <i class="fab fa-facebook-f mr-2"></i> Continue with Facebook
                     </button>
-                    <button type="button" class="w-full social-btn bg-black hover:bg-gray-800 text-white py-2 px-4 rounded-lg flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600">
+                    <button type="button" onclick="showComingSoon('Apple')" class="w-full social-btn bg-black hover:bg-gray-800 text-white py-2 px-4 rounded-lg flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600">
                         <i class="fab fa-apple mr-2"></i> Continue with Apple
                     </button>
                 </div>
@@ -516,6 +516,10 @@
         document.querySelector('.fa-apple').closest('button').addEventListener('click', function() {
             alert('Apple login would be implemented with Apple JS SDK');
         });
+
+        function showComingSoon(provider) {
+            alert(`${provider}'s API can be implemented when we get the keys`);
+        }
 
         // Regular form login handler
         document.querySelector('#login-form form').addEventListener('submit', function(e) {
