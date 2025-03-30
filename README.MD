@@ -1,5 +1,5 @@
-![Alt text](readmeimages/BudgetBuddyLogo.png =250x)
 
+<img src="readmeimages/BudgetBuddyLogo.png" alt="drawing" width="200"/>
 # Budget Buddy!
 *Your buddy for budgeting*
 
