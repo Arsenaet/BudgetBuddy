@@ -123,7 +123,9 @@
             <div class="bg-white p-6 rounded-lg shadow dark:bg-dark-800">
                 <h2 class="text-xl font-semibold mb-4 dark:text-dark-100">Spending by Category</h2>
                 <p class="text-gray-600 mb-4 dark:text-dark-400">Your expense distribution</p>
-                <canvas id="categoryPieChart" class="mx-auto mb-4" style="max-width: 300px;"></canvas>
+                <div class="mt-4" style="height: 300px;">
+                    <canvas id="categoryPieChart"></canvas>
+                </div>
                 <ul class="text-gray-600 space-y-2 dark:text-dark-400">
                     {% for category, amount in category_data.items() %}
                     <li>
@@ -305,45 +307,72 @@
             // Pie Chart
             const pieCtx = document.getElementById('categoryPieChart');
             if (pieCtx) {
-                const categoryData = {
-                    labels: JSON.parse('{{ category_data.keys()|list|tojson }}'),
-                    datasets: [{
-                        data: JSON.parse('{{ category_data.values()|list|tojson }}')
-                    }]
-                };
-    
-                if (categoryData.labels.length > 0) {
-                    new Chart(pieCtx, {
-                        type: 'pie',
-                        data: {
-                            labels: categoryData.labels,
-                            datasets: [{
-                                label: 'Spending by Category',
-                                data: categoryData.datasets[0].data,
-                                backgroundColor: [
-                                    'rgba(75, 192, 192, 0.2)',
-                                    'rgba(153, 102, 255, 0.2)',
-                                    'rgba(255, 206, 86, 0.2)',
-                                    'rgba(255, 159, 64, 0.2)',
-                                    'rgba(201, 203, 207, 0.2)',
-                                    'rgba(255, 99, 132, 0.2)',
-                                    'rgba(54, 162, 235, 0.2)'
-                                ],
-                                borderColor: [
-                                    'rgba(75, 192, 192, 1)',
-                                    'rgba(153, 102, 255, 1)',
-                                    'rgba(255, 206, 86, 1)',
-                                    'rgba(255, 159, 64, 1)',
-                                    'rgba(201, 203, 207, 1)',
-                                    'rgba(255, 99, 132, 1)',
-                                    'rgba(54, 162, 235, 1)'
-                                ],
-                                borderWidth: 1
-                            }]
+                const categoryDataStr = `{
+                    "labels": [{% for category, amount in category_data.items() %}"{{ category }}",{% endfor %}],
+                    "data": [{% for category, amount in category_data.items() %}{{ amount }},{% endfor %}]
+                }`;
+                
+                // Parse the JSON string
+                const categoryData = JSON.parse(categoryDataStr.replace(/,]/g, ']'));
+                
+                // Colors for the chart
+                const backgroundColors = [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(255, 159, 64, 0.7)',
+                    'rgba(201, 203, 207, 0.7)',
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)'
+                ];
+                
+                const borderColors = [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(201, 203, 207, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)'
+                ];
+                
+                // Create the chart
+                new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: categoryData.labels,
+                        datasets: [{
+                            label: 'Spending by Category',
+                            data: categoryData.data,
+                            backgroundColor: backgroundColors.slice(0, categoryData.labels.length),
+                            borderColor: borderColors.slice(0, categoryData.labels.length),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                position: 'right',
+                                labels: {
+                                    color: html.classList.contains('dark') ? '#e5e7eb' : '#6b7280'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: $${context.raw.toFixed(2)}`;
+                                    }
+                                }
+                            }
                         },
-                        options: getChartOptions('Spending by Category')
-                    });
-                }
+                        animation: {
+                            animateScale: true,
+                            animateRotate: true
+                        }
+                    }
+                });
             }
     
             // Line Chart
