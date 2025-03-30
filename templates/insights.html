@@ -8,68 +8,105 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            100: '#f3f4f6',
+                            200: '#e5e7eb',
+                            300: '#d1d5db',
+                            400: '#9ca3af',
+                            500: '#6b7280',
+                            600: '#4b5563',
+                            700: '#374151',
+                            800: '#1f2937',
+                            900: '#111827',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        #theme-toggle, #mobile-theme-toggle {
+            transition: all 0.3s ease;
+        }
+        #theme-toggle:hover, #mobile-theme-toggle:hover {
+            transform: scale(1.1);
+        }
+        #theme-toggle:active, #mobile-theme-toggle:active {
+            transform: scale(0.95);
+        }
+        .dark .chartjs-render-monitor {
+            filter: brightness(0.9) contrast(1.1);
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
-    <header class="bg-white shadow fixed w-full z-10">
-        <!--the Entire Navbar-->
+<body class="bg-gray-50 dark:bg-dark-900 dark:text-dark-200">
+    <header class="bg-white shadow fixed w-full z-10 dark:bg-dark-800 dark:shadow-dark">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-    
-            <!--the entire title-->
             <div class="flex items-center">
-    
-                <!--the icon placeholder-->
                 <div class="bg-green-500 text-white rounded-full w-10 h-10 flex items-center justify-center">
-                    <span class="font-bold">
-                        BB
-                    </span>
+                    <span class="font-bold">BB</span>
                 </div>
-    
-                <h1 class="ml-3 text-2xl font-bold text-green-500">
-                    Budget Buddy
-                </h1>
+                <h1 class="ml-3 text-2xl font-bold text-green-500">Budget Buddy</h1>
             </div>
-    
-            <!--the rest of the Navbar-->
-            <nav class="hidden md:flex space-x-4">
-                <a class="text-gray-600 flex items-center" href="/dashboard">
-                    <!--the icon for the dashboard page-->
+            <nav class="hidden md:flex space-x-4 items-center">
+                <a class="text-gray-600 flex items-center dark:text-dark-400 hover:text-green-500 dark:hover:text-green-400" href="/dashboard">
                     <i class="fas fa-home mr-1"></i> Dashboard
                 </a>
-                <a class="text-gray-600 flex items-center" href="/expenses">
-                    <!--the icon for the expenses page-->
+                <a class="text-gray-600 flex items-center dark:text-dark-400 hover:text-green-500 dark:hover:text-green-400" href="/expenses">
                     <i class="fas fa-wallet mr-1"></i> Expenses
                 </a>
-                <a class="text-green-500 font-semibold flex items-center" href="/insights">
-                    <!--the icon for the insights page-->
+                <a class="text-green-500 font-semibold flex items-center dark:text-green-400" href="/insights">
                     <i class="fas fa-chart-line mr-1"></i> Insights
                 </a>
-                <a class="text-gray-600 flex items-center" href="/categories">
-                    <!--the icon for the categories page-->
+                <a class="text-gray-600 flex items-center dark:text-dark-400 hover:text-green-500 dark:hover:text-green-400" href="/categories">
                     <i class="fas fa-list-ul mr-1"></i> Categories
                 </a>
+                <button id="theme-toggle" class="ml-4 text-gray-600 dark:text-dark-400 hover:text-gray-800 dark:hover:text-dark-200 transition-colors duration-200 focus:outline-none">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:block"></i>
+                </button>
             </nav>
             <div class="md:hidden">
-                <button id="menu-toggle" class="text-gray-600 focus:outline-none">
+                <button id="menu-toggle" class="text-gray-600 hover:text-green-500 focus:outline-none dark:text-dark-400 dark:hover:text-green-400">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
         </div>
-        <div id="mobile-menu" class="hidden md:hidden">
-            <a href="/dashboard" class="block px-4 py-2 text-gray-600 hover:text-black">Dashboard</a>
-            <a href="/expenses" class="block px-4 py-2 text-gray-600 hover:text-black">Expenses</a>
-            <a href="/insights" class="block px-4 py-2 text-green-600 hover:text-green-800">Insights</a>
-            <a href="/categories" class="block px-4 py-2 text-gray-600 hover:text-black">Categories</a>
+        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark-800">
+            <a href="/dashboard" class="block px-4 py-2 text-gray-600 hover:text-green-500 dark:text-dark-400 dark:hover:text-green-400">
+                <i class="fas fa-home mr-1"></i> Dashboard
+            </a>
+            <a href="/expenses" class="block px-4 py-2 text-gray-600 hover:text-green-500 dark:text-dark-400 dark:hover:text-green-400">
+                <i class="fas fa-wallet mr-1"></i> Expenses
+            </a>
+            <a href="/insights" class="block px-4 py-2 text-green-500 font-semibold dark:text-green-400">
+                <i class="fas fa-chart-line mr-1"></i> Insights
+            </a>
+            <a href="/categories" class="block px-4 py-2 text-gray-600 hover:text-green-500 dark:text-dark-400 dark:hover:text-green-400">
+                <i class="fas fa-list-ul mr-1"></i> Categories
+            </a>
+            <button id="mobile-theme-toggle" class="block w-full text-left px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-dark-400 dark:hover:text-dark-200">
+                <i class="fas fa-moon mr-1 dark:hidden"></i>
+                <i class="fas fa-sun mr-1 hidden dark:block"></i>
+                Toggle Theme
+            </button>
         </div>
     </header>
     <main class="container mx-auto px-4 py-8 pt-20">
-        <h1 class="text-3xl font-semibold mb-2">Insights</h1>
-        <p class="text-gray-600 mb-8">Smart analysis of your spending habits</p>
+        <h1 class="text-3xl font-semibold mb-2 dark:text-dark-100">Insights</h1>
+        <p class="text-gray-600 mb-8 dark:text-dark-400">Smart analysis of your spending habits</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h2 class="text-xl font-semibold mb-4">Spending by Category</h2>
-                <p class="text-gray-600 mb-4">Your expense distribution</p>
+            <div class="bg-white p-6 rounded-lg shadow dark:bg-dark-800">
+                <h2 class="text-xl font-semibold mb-4 dark:text-dark-100">Spending by Category</h2>
+                <p class="text-gray-600 mb-4 dark:text-dark-400">Your expense distribution</p>
                 <canvas id="categoryPieChart" class="mx-auto mb-4" style="max-width: 300px;"></canvas>
-                <ul class="text-gray-600 space-y-2">
+                <ul class="text-gray-600 space-y-2 dark:text-dark-400">
                     {% for category, amount in category_data.items() %}
                     <li>
                         <span class="inline-block w-4 h-4 bg-green-500 rounded-full mr-2"></span> 
@@ -82,47 +119,47 @@
                     {% endif %}
                 </ul>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h2 class="text-xl font-semibold mb-4">Monthly Budget</h2>
-                <p class="text-gray-600 mb-4">Your current spending progress</p>
-                <div class="text-3xl font-semibold text-green-600 mb-2">${{ "%.2f"|format(total_spent) }} of ${{ "%.2f"|format(monthly_budget) }}</div>
-                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                    <div class="bg-green-500 h-2.5 rounded-full" 
+            <div class="bg-white p-6 rounded-lg shadow dark:bg-dark-800">
+                <h2 class="text-xl font-semibold mb-4 dark:text-dark-100">Monthly Budget</h2>
+                <p class="text-gray-600 mb-4 dark:text-dark-400">Your current spending progress</p>
+                <div class="text-3xl font-semibold text-green-600 mb-2 dark:text-green-400">${{ "%.2f"|format(total_spent) }} of ${{ "%.2f"|format(monthly_budget) }}</div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-dark-600">
+                    <div class="bg-green-500 h-2.5 rounded-full dark:bg-green-400" 
                          id="insights-budget-bar" 
                          data-percentage="{{ (total_spent / monthly_budget) * 100 }}"></div>
                 </div>
                 <div class="flex justify-between items-center mb-4">
                     <div>
-                        <div class="text-2xl font-semibold">{{ "%.2f"|format(monthly_budget - total_spent) }}</div>
-                        <div class="text-gray-600">Remaining</div>
+                        <div class="text-2xl font-semibold dark:text-dark-100">{{ "%.2f"|format(monthly_budget - total_spent) }}</div>
+                        <div class="text-gray-600 dark:text-dark-400">Remaining</div>
                     </div>
                     <div>
-                        <div class="text-2xl font-semibold">{{ items|length }}</div>
-                        <div class="text-gray-600">Total Items</div>
+                        <div class="text-2xl font-semibold dark:text-dark-100">{{ items|length }}</div>
+                        <div class="text-gray-600 dark:text-dark-400">Total Items</div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow mb-8">
-            <h2 class="text-xl font-semibold mb-4">Spending Trend</h2>
-            <p class="text-gray-600 mb-4">Your recent spending activity</p>
+        <div class="bg-white p-6 rounded-lg shadow mb-8 dark:bg-dark-800">
+            <h2 class="text-xl font-semibold mb-4 dark:text-dark-100">Spending Trend</h2>
+            <p class="text-gray-600 mb-4 dark:text-dark-400">Your recent spending activity</p>
             
             {% if items %}
             <canvas id="spendingTrendChart" class="mx-auto" style="max-width: 100%; height: 300px;"></canvas>
             {% else %}
-            <div class="text-center py-8 text-gray-500">
+            <div class="text-center py-8 text-gray-500 dark:text-dark-400">
                 <p>No spending data available yet. Add some items to see your spending trend!</p>
             </div>
             {% endif %}
         </div>
-        <div class="bg-white p-6 rounded-lg shadow mb-8">
-            <h2 class="text-xl font-semibold mb-4">AI Insights</h2>
-            <p class="text-gray-600 mb-4">Smart analysis of your spending habits</p>
+        <div class="bg-white p-6 rounded-lg shadow mb-8 dark:bg-dark-800">
+            <h2 class="text-xl font-semibold mb-4 dark:text-dark-100">AI Insights</h2>
+            <p class="text-gray-600 mb-4 dark:text-dark-400">Smart analysis of your spending habits</p>
             <div class="flex items-start mb-4">
                 <i class="fas fa-arrow-up text-red-500 text-2xl mr-4"></i>
                 <div>
-                    <div class="font-semibold">Highest Spending Item</div>
-                    <div class="text-gray-600">
+                    <div class="font-semibold dark:text-dark-100">Highest Spending Item</div>
+                    <div class="text-gray-600 dark:text-dark-400">
                         {% if highest_category[0] != "None" %}
                         Your highest expense is {{ highest_category[0] }} with ${{ "%.2f"|format(highest_category[1]) }}.
                         {% else %}
@@ -134,8 +171,8 @@
             <div class="flex items-start">
                 <i class="fas fa-lightbulb text-green-500 text-2xl mr-4"></i>
                 <div>
-                    <div class="font-semibold">Budget Status</div>
-                    <div class="text-gray-600">
+                    <div class="font-semibold dark:text-dark-100">Budget Status</div>
+                    <div class="text-gray-600 dark:text-dark-400">
                         {% if total_spent > 0 %}
                             {% if total_spent > monthly_budget %}
                             You are over budget by ${{ "%.2f"|format(total_spent - monthly_budget) }}.
@@ -149,12 +186,13 @@
                 </div>
             </div>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow mt-6">
-            <h3 class="text-xl font-semibold mb-4">Ask Budget Buddy</h3>
-            <p class="text-gray-600 mb-4">Have a question about your budget? Ask away!</p>
+        <div class="bg-white p-6 rounded-lg shadow mt-6 dark:bg-dark-800">
+            <h3 class="text-xl font-semibold mb-4 dark:text-dark-100">Ask Budget Buddy</h3>
+            <p class="text-gray-600 mb-4 dark:text-dark-400">Have a question about your budget? Ask away!</p>
             <form action="/insights" method="post" class="flex flex-col gap-2" id="aiQueryForm">
-                <input type="text" name="query" placeholder="e.g., How can I save more money?" class="border p-2 rounded">
-                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white p-2 rounded flex justify-center items-center" id="submitButton">
+                <input type="text" name="query" placeholder="e.g., How can I save more money?" 
+                       class="border p-2 rounded dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white p-2 rounded flex justify-center items-center transition-colors duration-200" id="submitButton">
                     <span>Ask</span>
                     <div class="ml-2 hidden" id="loadingSpinner">
                         <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -164,13 +202,57 @@
                     </div>
                 </button>
             </form>
-            <div class="mt-4 p-4 border border-gray-200 rounded-lg">
-                <h4 class="font-semibold mb-2">Insights:</h4>
-                <div id="responseContainer">{{ prompt_result|safe if prompt_result else "Ask a question about your budget." }}</div>
+            <div class="mt-4 p-4 border border-gray-200 rounded-lg dark:border-dark-600">
+                <h4 class="font-semibold mb-2 dark:text-dark-100">Insights:</h4>
+                <div id="responseContainer" class="dark:text-dark-300">{{ prompt_result|safe if prompt_result else "Ask a question about your budget." }}</div>
             </div>
         </div>
     </main>
     <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
+        const html = document.documentElement;
+
+        // Check for saved user preference or use system preference
+        const userTheme = localStorage.getItem('theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // Initial theme check
+        const themeCheck = () => {
+            if (userTheme === 'dark' || (!userTheme && systemTheme)) {
+                html.classList.add('dark');
+                if (themeToggle) themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                if (mobileThemeToggle) mobileThemeToggle.innerHTML = '<i class="fas fa-sun mr-1"></i> Toggle Theme';
+            } else {
+                html.classList.remove('dark');
+                if (themeToggle) themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                if (mobileThemeToggle) mobileThemeToggle.innerHTML = '<i class="fas fa-moon mr-1"></i> Toggle Theme';
+            }
+        };
+
+        // Manual theme switch
+        const themeSwitch = () => {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                if (themeToggle) themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                if (mobileThemeToggle) mobileThemeToggle.innerHTML = '<i class="fas fa-moon mr-1"></i> Toggle Theme';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                if (themeToggle) themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                if (mobileThemeToggle) mobileThemeToggle.innerHTML = '<i class="fas fa-sun mr-1"></i> Toggle Theme';
+            }
+        };
+
+        // Event listeners for theme toggle buttons
+        if (themeToggle) themeToggle.addEventListener('click', themeSwitch);
+        if (mobileThemeToggle) mobileThemeToggle.addEventListener('click', themeSwitch);
+
+        // Invoke theme check on initial load
+        themeCheck();
+
         document.getElementById('menu-toggle').addEventListener('click', function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
@@ -195,8 +277,8 @@
                 
                 // Change color based on percentage
                 if (parseFloat(percentage) > 100) {
-                    budgetBar.classList.remove('bg-green-500');
-                    budgetBar.classList.add('bg-red-500');
+                    budgetBar.classList.remove('bg-green-500', 'dark:bg-green-400');
+                    budgetBar.classList.add('bg-red-500', 'dark:bg-red-400');
                 }
             }
             
@@ -247,6 +329,9 @@
                             plugins: {
                                 legend: {
                                     position: 'top',
+                                    labels: {
+                                        color: html.classList.contains('dark') ? '#e5e7eb' : '#6b7280'
+                                    }
                                 },
                                 tooltip: {
                                     callbacks: {
@@ -300,7 +385,28 @@
                             responsive: true,
                             scales: {
                                 y: {
-                                    beginAtZero: true
+                                    beginAtZero: true,
+                                    ticks: {
+                                        color: html.classList.contains('dark') ? '#e5e7eb' : '#6b7280'
+                                    },
+                                    grid: {
+                                        color: html.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                                    }
+                                },
+                                x: {
+                                    ticks: {
+                                        color: html.classList.contains('dark') ? '#e5e7eb' : '#6b7280'
+                                    },
+                                    grid: {
+                                        color: html.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        color: html.classList.contains('dark') ? '#e5e7eb' : '#6b7280'
+                                    }
                                 }
                             }
                         }
