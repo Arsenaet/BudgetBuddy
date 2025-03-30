@@ -12,9 +12,14 @@ from waitress import serve
 from werkzeug.security import generate_password_hash, check_password_hash
 from PerpLibs import Request, Textonly
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-app.config['SECRET_KEY'] = 'your-secret-key-here'  # Added for session support
+app.config['SECRET_KEY'] = os.getenv('SERVER_SECRET')
 db = SQLAlchemy(app)
 
 class Todo(db.Model):
