@@ -1,4 +1,3 @@
-
 <img src="readmeimages/BudgetBuddyLogo.png" alt="drawing" width="200"/>
 # Budget Buddy!
 *Your buddy for budgeting*
@@ -8,12 +7,12 @@ This is the Readme! There isn't much content here we **Budgeted** all of our tim
 ## Features
 ### Dashboard
 *All you need at a glance*
-![Alt text](readmeimages/budgetbuddy1.png =250x)
+<img src="readmeimages/budgetbuddy1.png" alt="drawing" width="400"/>
 
 Tired of page after page to use the most basic features of a product? Our dashboard is compact and convenient, providing fast and easy insights, metrics and pretty visuals you want to see including unique, bite sized AI powered tips! 
 
 ### Expenses
-![Alt text](readmeimages/budgetbuddy2.png =250x)
+<img src="readmeimages/budgetbuddy1.png" alt="drawing" width="400"/>
 
 Whether you're feeling nostaligic for spreadheets of old, or you need some more controls (probably cause you punched in 4000 instead of 40.00, lets be real), the expenses tab has got you covered, giving you a nice, neat, no-nonsense of what you've spent your hard earned cash and what you want to add to make your insights more powerful
 
