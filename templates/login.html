@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Buddy - Sign In</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Google Identity Services SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            100: '#f3f4f6',
+                            200: '#e5e7eb',
+                            300: '#d1d5db',
+                            400: '#9ca3af',
+                            500: '#6b7280',
+                            600: '#4b5563',
+                            700: '#374151',
+                            800: '#1f2937',
+                            900: '#111827',
+                        },
+                        google: {
+                            blue: '#4285F4',
+                            red: '#EA4335',
+                            yellow: '#FBBC05',
+                            green: '#34A853'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        #theme-toggle {
+            transition: all 0.3s ease;
+        }
+        #theme-toggle:hover {
+            transform: scale(1.1);
+        }
+        #theme-toggle:active {
+            transform: scale(0.95);
+        }
+        .password-requirement {
+            transition: all 0.3s ease;
+        }
+        .valid {
+            color: #10B981; /* green-500 */
+        }
+        .invalid {
+            color: #EF4444; /* red-500 */
+        }
+        .password-match {
+            display: none;
+        }
+        .password-mismatch {
+            display: none;
+            color: #EF4444; /* red-500 */
+        }
+        .social-btn {
+            transition: all 0.3s ease;
+        }
+        .social-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .social-btn:active {
+            transform: translateY(0);
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #6B7280; /* gray-500 */
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #E5E7EB; /* gray-200 */
+        }
+        .divider::before {
+            margin-right: 1rem;
+        }
+        .divider::after {
+            margin-left: 1rem;
+        }
+        .dark .divider {
+            color: #9CA3AF; /* dark-400 */
+        }
+        .dark .divider::before,
+        .dark .divider::after {
+            border-bottom-color: #374151; /* dark-700 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-dark-900 min-h-screen flex flex-col">
+    <!-- Header with theme toggle -->
+    <header class="bg-white shadow dark:bg-dark-800">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="bg-green-500 text-white rounded-full w-10 h-10 flex items-center justify-center">
+                    <span class="font-bold">BB</span>
+                </div>
+                <h1 class="ml-3 text-2xl font-bold text-green-500">Budget Buddy</h1>
+            </div>
+            <button id="theme-toggle" class="text-gray-600 dark:text-dark-400 hover:text-gray-800 dark:hover:text-dark-200 transition-colors duration-200 focus:outline-none">
+                <i class="fas fa-moon dark:hidden"></i>
+                <i class="fas fa-sun hidden dark:block"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main content with auth forms -->
+    <main class="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
+        <div class="w-full max-w-md">
+            <!-- Tabs for login/register -->
+            <div class="flex border-b border-gray-200 dark:border-dark-700 mb-6">
+                <button id="login-tab" class="flex-1 py-2 px-4 font-medium text-center text-green-500 border-b-2 border-green-500 dark:text-green-400 dark:border-green-400">
+                    Sign In
+                </button>
+                <button id="register-tab" class="flex-1 py-2 px-4 font-medium text-center text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-300">
+                    Register
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-form" class="bg-white rounded-lg shadow p-6 dark:bg-dark-800">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-dark-100">Welcome back</h2>
+                
+                <!-- Social Login Buttons -->
+                <div class="mb-6 space-y-3">
+                    <!-- Google Sign-In -->
+                    <div id="g_id_onload"
+                        data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+                        data-context="signin"
+                        data-ux_mode="popup"
+                        data-callback="handleGoogleSignIn"
+                        data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin"
+                        data-type="standard"
+                        data-shape="rectangular"
+                        data-theme="outline"
+                        data-text="signin_with"
+                        data-size="large"
+                        data-logo_alignment="left"
+                        data-width="100%">
+                    </div>
+                    
+                    <!-- Other Social Logins -->
+                    <button type="button" class="w-full social-btn bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center">
+                        <i class="fab fa-facebook-f mr-2"></i> Continue with Facebook
+                    </button>
+                    <button type="button" class="w-full social-btn bg-black hover:bg-gray-800 text-white py-2 px-4 rounded-lg flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600">
+                        <i class="fab fa-apple mr-2"></i> Continue with Apple
+                    </button>
+                </div>
+                
+                <div class="divider mb-6">OR</div>
+                
+                <!-- Email Login Form -->
+                <form>
+                    <div class="mb-4">
+                        <label for="login-email" class="block text-gray-700 dark:text-dark-400 mb-2">Email</label>
+                        <input type="email" id="login-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                    </div>
+                    <div class="mb-6">
+                        <label for="login-password" class="block text-gray-700 dark:text-dark-400 mb-2">Password</label>
+                        <input type="password" id="login-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <a href="#" class="text-sm text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300 mt-1 inline-block">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors duration-200">
+                        Sign In
+                    </button>
+                </form>
+                <div class="mt-4 text-center text-gray-600 dark:text-dark-400">
+                    <p>Don't have an account? <button id="switch-to-register" class="text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300">Register</button></p>
+                </div>
+            </div>
+
+            <!-- Register Form (hidden by default) -->
+            <div id="register-form" class="bg-white rounded-lg shadow p-6 dark:bg-dark-800 hidden">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-dark-100">Create an account</h2>
+                
+                <!-- Social Register Buttons -->
+                <div class="mb-6 space-y-3">
+                    <!-- Google Sign-Up -->
+                    <div id="g_id_onload_register"
+                        data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+                        data-context="signup"
+                        data-ux_mode="popup"
+                        data-callback="handleGoogleSignIn"
+                        data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin"
+                        data-type="standard"
+                        data-shape="rectangular"
+                        data-theme="outline"
+                        data-text="signup_with"
+                        data-size="large"
+                        data-logo_alignment="left"
+                        data-width="100%">
+                    </div>
+                    
+                    <!-- Other Social Logins -->
+                    <button type="button" class="w-full social-btn bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center">
+                        <i class="fab fa-facebook-f mr-2"></i> Continue with Facebook
+                    </button>
+                    <button type="button" class="w-full social-btn bg-black hover:bg-gray-800 text-white py-2 px-4 rounded-lg flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600">
+                        <i class="fab fa-apple mr-2"></i> Continue with Apple
+                    </button>
+                </div>
+                
+                <div class="divider mb-6">OR</div>
+                
+                <!-- Email Register Form -->
+                <form id="registration-form">
+                    <div class="mb-4">
+                        <label for="register-name" class="block text-gray-700 dark:text-dark-400 mb-2">Full Name</label>
+                        <input type="text" id="register-name" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="register-email" class="block text-gray-700 dark:text-dark-400 mb-2">Email</label>
+                        <input type="email" id="register-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="register-password" class="block text-gray-700 dark:text-dark-400 mb-2">Password</label>
+                        <input type="password" id="register-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <div class="mt-2 text-sm">
+                            <p class="password-requirement" id="length"><i class="fas fa-check-circle valid hidden"></i><i class="fas fa-times-circle invalid"></i> At least 8 characters</p>
+                            <p class="password-requirement" id="uppercase"><i class="fas fa-check-circle valid hidden"></i><i class="fas fa-times-circle invalid"></i> At least 1 uppercase letter</p>
+                            <p class="password-requirement" id="lowercase"><i class="fas fa-check-circle valid hidden"></i><i class="fas fa-times-circle invalid"></i> At least 1 lowercase letter</p>
+                            <p class="password-requirement" id="number"><i class="fas fa-check-circle valid hidden"></i><i class="fas fa-times-circle invalid"></i> At least 1 number</p>
+                            <p class="password-requirement" id="special"><i class="fas fa-check-circle valid hidden"></i><i class="fas fa-times-circle invalid"></i> At least 1 special character</p>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label for="register-confirm-password" class="block text-gray-700 dark:text-dark-400 mb-2">Confirm Password</label>
+                        <input type="password" id="register-confirm-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <div class="mt-2 text-sm">
+                            <p class="password-match"><i class="fas fa-check-circle valid"></i> Passwords match</p>
+                            <p class="password-mismatch"><i class="fas fa-times-circle invalid"></i> Passwords don't match</p>
+                        </div>
+                    </div>
+                    <button type="submit" id="register-button" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Register
+                    </button>
+                </form>
+                <div class="mt-4 text-center text-gray-600 dark:text-dark-400">
+                    <p>Already have an account? <button id="switch-to-login" class="text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300">Sign In</button></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white shadow dark:bg-dark-800 py-4">
+        <div class="container mx-auto px-4 text-center text-gray-600 dark:text-dark-400">
+            <p>&copy; 2023 Budget Buddy. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        // Check for saved user preference or use system preference
+        const userTheme = localStorage.getItem('theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // Initial theme check
+        const themeCheck = () => {
+            if (userTheme === 'dark' || (!userTheme && systemTheme)) {
+                html.classList.add('dark');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                html.classList.remove('dark');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+        };
+
+        // Manual theme switch
+        const themeSwitch = () => {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+        };
+
+        // Event listener for theme toggle button
+        if (themeToggle) {
+            themeToggle.addEventListener('click', themeSwitch);
+        }
+
+        // Invoke theme check on initial load
+        themeCheck();
+
+        // Form switching functionality
+        const loginTab = document.getElementById('login-tab');
+        const registerTab = document.getElementById('register-tab');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const switchToRegister = document.getElementById('switch-to-register');
+        const switchToLogin = document.getElementById('switch-to-login');
+
+        function showLoginForm() {
+            loginTab.classList.add('text-green-500', 'dark:text-green-400', 'border-b-2', 'border-green-500', 'dark:border-green-400');
+            loginTab.classList.remove('text-gray-500', 'dark:text-dark-400');
+            registerTab.classList.add('text-gray-500', 'dark:text-dark-400');
+            registerTab.classList.remove('text-green-500', 'dark:text-green-400', 'border-b-2', 'border-green-500', 'dark:border-green-400');
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+        }
+
+        function showRegisterForm() {
+            registerTab.classList.add('text-green-500', 'dark:text-green-400', 'border-b-2', 'border-green-500', 'dark:border-green-400');
+            registerTab.classList.remove('text-gray-500', 'dark:text-dark-400');
+            loginTab.classList.add('text-gray-500', 'dark:text-dark-400');
+            loginTab.classList.remove('text-green-500', 'dark:text-green-400', 'border-b-2', 'border-green-500', 'dark:border-green-400');
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+        }
+
+        // Event listeners for tab switching
+        loginTab.addEventListener('click', showLoginForm);
+        registerTab.addEventListener('click', showRegisterForm);
+        switchToRegister.addEventListener('click', showRegisterForm);
+        switchToLogin.addEventListener('click', showLoginForm);
+
+        // Password validation functionality
+        const passwordInput = document.getElementById('register-password');
+        const confirmPasswordInput = document.getElementById('register-confirm-password');
+        const registerButton = document.getElementById('register-button');
+        const passwordMatch = document.querySelector('.password-match');
+        const passwordMismatch = document.querySelector('.password-mismatch');
+
+        // Check password requirements
+        function checkPasswordRequirements(password) {
+            // Check length
+            const lengthValid = password.length >= 8;
+            document.getElementById('length').querySelector('.valid').classList.toggle('hidden', !lengthValid);
+            document.getElementById('length').querySelector('.invalid').classList.toggle('hidden', lengthValid);
+
+            // Check uppercase
+            const uppercaseValid = /[A-Z]/.test(password);
+            document.getElementById('uppercase').querySelector('.valid').classList.toggle('hidden', !uppercaseValid);
+            document.getElementById('uppercase').querySelector('.invalid').classList.toggle('hidden', uppercaseValid);
+
+            // Check lowercase
+            const lowercaseValid = /[a-z]/.test(password);
+            document.getElementById('lowercase').querySelector('.valid').classList.toggle('hidden', !lowercaseValid);
+            document.getElementById('lowercase').querySelector('.invalid').classList.toggle('hidden', lowercaseValid);
+
+            // Check number
+            const numberValid = /[0-9]/.test(password);
+            document.getElementById('number').querySelector('.valid').classList.toggle('hidden', !numberValid);
+            document.getElementById('number').querySelector('.invalid').classList.toggle('hidden', numberValid);
+
+            // Check special character
+            const specialValid = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            document.getElementById('special').querySelector('.valid').classList.toggle('hidden', !specialValid);
+            document.getElementById('special').querySelector('.invalid').classList.toggle('hidden', specialValid);
+
+            return lengthValid && uppercaseValid && lowercaseValid && numberValid && specialValid;
+        }
+
+        // Check if passwords match
+        function checkPasswordMatch() {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (password && confirmPassword) {
+                if (password === confirmPassword) {
+                    passwordMatch.style.display = 'block';
+                    passwordMismatch.style.display = 'none';
+                    return true;
+                } else {
+                    passwordMatch.style.display = 'none';
+                    passwordMismatch.style.display = 'block';
+                    return false;
+                }
+            }
+            passwordMatch.style.display = 'none';
+            passwordMismatch.style.display = 'none';
+            return false;
+        }
+
+        // Enable/disable register button based on validation
+        function validateForm() {
+            const passwordValid = checkPasswordRequirements(passwordInput.value);
+            const passwordsMatch = checkPasswordMatch();
+            const nameValid = document.getElementById('register-name').value.trim() !== '';
+            const emailValid = document.getElementById('register-email').value.trim() !== '';
+
+            registerButton.disabled = !(passwordValid && passwordsMatch && nameValid && emailValid);
+        }
+
+        // Event listeners for validation
+        passwordInput.addEventListener('input', () => {
+            checkPasswordRequirements(passwordInput.value);
+            checkPasswordMatch();
+            validateForm();
+        });
+
+        confirmPasswordInput.addEventListener('input', () => {
+            checkPasswordMatch();
+            validateForm();
+        });
+
+        document.getElementById('register-name').addEventListener('input', validateForm);
+        document.getElementById('register-email').addEventListener('input', validateForm);
+
+        // Form submission
+        document.getElementById('registration-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!registerButton.disabled) {
+                // Form is valid, proceed with registration
+                alert('Registration successful!');
+                // Here you would typically send the data to your server
+            }
+        });
+
+        // Google Sign-In Handler
+        function handleGoogleSignIn(response) {
+            // Handle the Google sign-in response
+            console.log('Google sign-in response:', response);
+            
+            // Here you would typically:
+            // 1. Verify the ID token with your backend
+            // 2. Create or authenticate the user in your system
+            // 3. Redirect to the app or show success message
+            
+            // For demo purposes, we'll just show an alert
+            alert('Google sign-in successful!');
+            
+            // Example of decoding the credential (in a real app, verify on server)
+            const credential = response.credential;
+            const payload = JSON.parse(atob(credential.split('.')[1]));
+            console.log('User details:', payload);
+            
+            // You would typically redirect or update UI here
+            // window.location.href = '/dashboard';
+        }
+
+        // Facebook Login Handler (would need FB SDK initialized)
+        document.querySelector('.fa-facebook-f').closest('button').addEventListener('click', function() {
+            alert('Facebook login would be implemented with Facebook SDK');
+            // FB.login(function(response) {
+            //     // Handle response
+            // }, {scope: 'public_profile,email'});
+        });
+
+        // Apple Login Handler
+        document.querySelector('.fa-apple').closest('button').addEventListener('click', function() {
+            alert('Apple login would be implemented with Apple JS SDK');
+        });
+
+        // Regular form login handler
+        document.querySelector('#login-form form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            // Here you would typically validate and send to your backend
+            console.log('Login attempt with:', email, password);
+            alert('Login form submitted! (Would authenticate with backend)');
+        });
+    </script>
+</body>
+</html>
