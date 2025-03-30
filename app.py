@@ -87,6 +87,8 @@ def dashboard():
     
     # Get today's date for the date input default
     today_date = datetime.now().strftime('%Y-%m-%d')
+
+    
     
     return render_template('dashboard.html', 
                           items=items,
