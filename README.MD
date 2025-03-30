@@ -45,7 +45,7 @@ and the navbar is here too, it took a lot of code, please appreciate this
 
 ## Installation
 this is gonna be step by step build instructons, if you have any technical knowlage, everything SHOULD be understanadble cause of the requirements, you also need a .env with a perplexity API key and secretkey (PERPLEXITY_API_KEY and ServerSecret)
-###Requirements
+### Requirements
 
 **A couple of these are from testing, so arent used but are still on the install list because I dont care**
 
