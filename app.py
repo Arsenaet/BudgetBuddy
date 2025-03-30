@@ -32,6 +32,7 @@ class Budget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     monthly_amount = db.Column(db.Float, nullable=False, default=2000.0)
     date_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
         return f'<Budget ${self.monthly_amount}>'
@@ -43,6 +44,7 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now)
     todos = db.relationship('Todo', backref='user', lazy=True)
+    budgets = db.relationship('Budget', backref='user', lazy=True)
     
     def __repr__(self):
         return f'<User {self.username}>'
@@ -58,25 +60,33 @@ def login():
     """Display login page and handle login logic."""
     error_message = None
     
-    if request.method == 'POST':
-        # Get credentials from form
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        if not username or not password:
-            error_message = "Username and password are required"
-        else:
-            # Find the user
-            user = User.query.filter_by(username=username).first()
+    try:
+        if request.method == 'POST':
+            # Get credentials from form
+            username = request.form.get('username')
+            password = request.form.get('password')
             
-            # Check if user exists and password is correct
-            if user and check_password_hash(user.password, password):
-                session['logged_in'] = True
-                session['username'] = user.username
-                session['user_id'] = user.id
-                return redirect('/dashboard')
+            app.logger.info(f"Login attempt for username: {username}")
+            
+            if not username or not password:
+                error_message = "Username and password are required"
             else:
-                error_message = "Invalid username or password"
+                # Find the user
+                user = User.query.filter_by(username=username).first()
+                
+                # Check if user exists and password is correct
+                if user and check_password_hash(user.password, password):
+                    session['logged_in'] = True
+                    session['username'] = user.username
+                    session['user_id'] = user.id
+                    app.logger.info(f"Login successful for username: {username}")
+                    return redirect('/dashboard')
+                else:
+                    error_message = "Invalid username or password"
+                    app.logger.warning(f"Failed login attempt for username: {username}")
+    except Exception as e:
+        app.logger.error(f"Login error: {str(e)}")
+        error_message = "An error occurred during login. Please try again."
     
     return render_template('login.html', error_message=error_message)
 
@@ -90,44 +100,56 @@ def logout():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """Handle user registration."""
-    if request.method == 'POST':
-        # Get form data
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        # Basic validation
-        if not username or not email or not password:
-            return render_template('login.html', error_message="All fields are required")
-        
-        # Check if username or email already exists
-        existing_user = User.query.filter((User.username == username) | (User.email == email)).first()
-        if existing_user:
-            return render_template('login.html', error_message="Username or email already exists")
-        
-        # Create new user with hashed password using SHA-256
-        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(username=username, email=email, password=hashed_password)
-        
-        try:
-            db.session.add(new_user)
-            db.session.commit()
+    try:
+        if request.method == 'POST':
+            # Get form data
+            username = request.form.get('username')
+            email = request.form.get('email')
+            password = request.form.get('password')
             
-            # Log the user in - make sure to set the user_id
-            session['logged_in'] = True
-            session['username'] = username
-            session['user_id'] = new_user.id
+            app.logger.info(f"Registration attempt for username: {username}, email: {email}")
             
-            # Create a default budget for the new user
-            default_budget = Budget(monthly_amount=2000.0)
-            db.session.add(default_budget)
-            db.session.commit()
+            # Basic validation
+            if not username or not email or not password:
+                app.logger.warning("Registration attempt with missing fields")
+                return render_template('login.html', error_message="All fields are required")
             
-            return redirect('/dashboard')
-        except Exception as e:
-            db.session.rollback()
-            app.logger.error(f"Error creating user: {e}")
-            return render_template('login.html', error_message=f"Registration failed: {str(e)}")
+            # Check if username or email already exists
+            existing_user = User.query.filter((User.username == username) | (User.email == email)).first()
+            if existing_user:
+                app.logger.warning(f"Registration attempt with existing username or email: {username}, {email}")
+                return render_template('login.html', error_message="Username or email already exists")
+            
+            # Create new user with hashed password using SHA-256
+            hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+            new_user = User(username=username, email=email, password=hashed_password)
+            
+            try:
+                db.session.add(new_user)
+                db.session.commit()
+                
+                app.logger.info(f"User created successfully: {username}")
+                
+                # Log the user in - make sure to set the user_id
+                session['logged_in'] = True
+                session['username'] = username
+                session['user_id'] = new_user.id
+                
+                # Create a default budget for the new user
+                default_budget = Budget(monthly_amount=2000.0, user_id=new_user.id)
+                db.session.add(default_budget)
+                db.session.commit()
+                
+                app.logger.info(f"Default budget created for user: {username}")
+                
+                return redirect('/dashboard')
+            except Exception as e:
+                db.session.rollback()
+                app.logger.error(f"Database error creating user: {e}")
+                return render_template('login.html', error_message=f"Registration failed: {str(e)}")
+    except Exception as e:
+        app.logger.error(f"Registration error: {str(e)}")
+        return render_template('login.html', error_message="An error occurred during registration. Please try again.")
     
     # GET requests are redirected to login page where the registration form exists
     return redirect('/login')
@@ -174,8 +196,8 @@ def dashboard():
     items = Todo.query.filter_by(user_id=user_id).all()
     total_spent = sum(item.cost for item in items)
     
-    # Get current budget
-    budget = Budget.query.first()
+    # Get current budget - fetch user-specific budget
+    budget = Budget.query.filter_by(user_id=user_id).first()
     monthly_budget = budget.monthly_amount if budget else 2000.0
     
     # Calculate basic statistics
@@ -359,8 +381,8 @@ def insights():
     items = Todo.query.filter_by(user_id=user_id).all()
     total_spent = sum(item.cost for item in items)
     
-    # Get current budget
-    budget = Budget.query.first()
+    # Get current budget - fetch user-specific budget
+    budget = Budget.query.filter_by(user_id=user_id).first()
     monthly_budget = budget.monthly_amount if budget else 2000.0
     
     # Categorize spending
@@ -389,10 +411,15 @@ def insights():
 
 @app.errorhandler(500)
 def internal_error(error):
-    """Handle internal server errors."""
-    app.logger.error("Server Error: %s", error)
-    return "Internal Server Error", 500
+    db.session.rollback()
+    app.logger.error(f"Internal server error: {error}")
+    return render_template('login.html', error_message="An internal server error occurred. Please try again."), 500
 
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Unhandled exception: {str(e)}")
+    db.session.rollback()
+    return render_template('login.html', error_message="An unexpected error occurred. Please try again."), 500
 
 @app.route("/submit", methods=["POST"])
 @login_required
@@ -479,13 +506,14 @@ def set_budget():
     """Update the monthly budget amount."""
     try:
         new_budget = float(request.form.get('monthly_budget', 2000))
+        user_id = session.get('user_id')
         
-        # Get the current budget or create a new one if it doesn't exist
-        budget = Budget.query.first()
+        # Get the current budget for this user or create a new one if it doesn't exist
+        budget = Budget.query.filter_by(user_id=user_id).first()
         if budget:
             budget.monthly_amount = new_budget
         else:
-            budget = Budget(monthly_amount=new_budget)
+            budget = Budget(monthly_amount=new_budget, user_id=user_id)
             db.session.add(budget)
             
         db.session.commit()
@@ -516,8 +544,8 @@ def get_ai_insights():
         items = Todo.query.filter_by(user_id=user_id).all()
         total_spent = sum(item.cost for item in items)
         
-        # Get current budget
-        budget = Budget.query.first()
+        # Get current budget - fetch user-specific budget
+        budget = Budget.query.filter_by(user_id=user_id).first()
         monthly_budget = budget.monthly_amount if budget else 2000.0
         
         # Categorize spending

@@ -171,10 +171,11 @@
                 <div class="mb-6 space-y-3">
                     <!-- Google Sign-In -->
                     <div id="g_id_onload"
-                        data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+                        data-client_id="YOUR_GOOGLE_CLIENT_ID"
                         data-context="signin"
                         data-ux_mode="popup"
                         data-callback="handleGoogleSignIn"
+                        data-auto_select="false"
                         data-auto_prompt="false">
                     </div>
                     <div class="g_id_signin google-btn-wrapper rounded-lg overflow-hidden"
@@ -228,10 +229,21 @@
                 <div class="mb-6 space-y-3">
                     <!-- Google Sign-Up -->
                     <div id="g_id_onload_register"
-                        data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+                        data-client_id="YOUR_GOOGLE_CLIENT_ID"
                         data-context="signup"
                         data-ux_mode="popup"
                         data-callback="handleGoogleSignIn"
+                        data-auto_select="false"
+                        data-auto_prompt="false">
+                    </div>
+                    
+                    <!-- Google Sign-Up -->
+                    <div id="g_id_onload_register"
+                        data-client_id="YOUR_GOOGLE_CLIENT_ID"
+                        data-context="signup"
+                        data-ux_mode="popup"
+                        data-callback="handleGoogleSignIn"
+                        data-auto_select="false"
                         data-auto_prompt="false">
                     </div>
                     <div class="g_id_signin google-btn-wrapper rounded-lg overflow-hidden"
@@ -311,6 +323,13 @@
         // Theme toggle functionality
         const themeToggle = document.getElementById('theme-toggle');
         const html = document.documentElement;
+
+        // Google Sign-In handler (placeholder - update when Google API is configured)
+        function handleGoogleSignIn(response) {
+            console.log("Google sign-in response received", response);
+            // This would normally process the response and redirect
+            // but is a placeholder until Google API is properly configured
+        }
 
         // Check for saved user preference or use system preference
         const userTheme = localStorage.getItem('theme');
@@ -482,28 +501,6 @@
                 alert('Please fix the form errors before submitting.');
             }
         });
-
-        // Google Sign-In Handler
-        function handleGoogleSignIn(response) {
-            // Handle the Google sign-in response
-            console.log('Google sign-in response:', response);
-            
-            // Here you would typically:
-            // 1. Verify the ID token with your backend
-            // 2. Create or authenticate the user in your system
-            // 3. Redirect to the app or show success message
-            
-            // For demo purposes, we'll just show an alert
-            alert('Google sign-in successful!');
-            
-            // Example of decoding the credential (in a real app, verify on server)
-            const credential = response.credential;
-            const payload = JSON.parse(atob(credential.split('.')[1]));
-            console.log('User details:', payload);
-            
-            // You would typically redirect or update UI here
-            // window.location.href = '/dashboard';
-        }
 
         // Facebook Login Handler (would need FB SDK initialized)
         document.querySelector('.fa-facebook-f').closest('button').addEventListener('click', function() {
