@@ -100,27 +100,9 @@ def expenses():
     return render_template('expenses.html', items=items)
 
 
-@app.route('/categories', methods=['GET', 'POST'])
+@app.route('/categories')
 def categories():
-    """Display expense categories and handle new items."""
-    if request.method == 'POST':
-        item_name = request.form['item']
-        item_cost = request.form.get('cost', 0)
-        
-        try:
-            item_cost = int(item_cost)
-            new_item = Todo(item=item_name, cost=item_cost)
-            
-            db.session.add(new_item)
-            db.session.commit()
-            return redirect('/categories')
-        except sqlalchemy.exc.SQLAlchemyError as e:
-            app.logger.error("Database error: %s", e)
-            return 'There was an issue adding your item'
-        except ValueError as e:
-            app.logger.error("Value error: %s", e)
-            return 'Invalid cost value'
-    
+    """Display expense categories."""
     items = Todo.query.all()
     
     # Categorize spending

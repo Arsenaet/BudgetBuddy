@@ -59,7 +59,7 @@
                 <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2 relative overflow-hidden">
                     <div class="bg-green-500 h-2.5 rounded-full absolute top-0 left-0" 
                          id="budget-bar" 
-                         style="width: {{ (total_spent / 2000) * 100 }}%"></div>
+                         data-percentage="{{ (total_spent / 2000) * 100 }}"></div>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4 mt-4">
@@ -78,8 +78,26 @@
             <h3 class="text-xl font-bold">Quick Add</h3>
             <form action="/dashboard" method="POST" class="mt-4">
                 <div class="mb-4">
-                    <label class="block text-gray-700">Item</label>
-                    <input type="text" name="item" class="w-full border border-gray-300 rounded-lg p-2 mt-1" required>
+                    <label class="block text-gray-700">Category</label>
+                    <select name="item" class="w-full border border-gray-300 rounded-lg p-2 mt-1" required>
+                        <option value="" disabled selected>Select a category</option>
+                        <option value="Housing">Housing</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Groceries">Groceries</option>
+                        <option value="Dining">Dining</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Insurance">Insurance</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Investments">Investments</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Personal Care">Personal Care</option>
+                        <option value="Subscriptions">Subscriptions</option>
+                        <option value="Travel">Travel</option>
+                        <option value="Fitness">Fitness</option>
+                        <option value="Pets">Pets</option>
+                        <option value="Technology">Technology</option>
+                    </select>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700">Cost</label>
@@ -177,21 +195,24 @@
 <script>
 // Chart rendering
 document.addEventListener('DOMContentLoaded', function() {
+    // Apply budget bar width from data attribute
+    const budgetBar = document.getElementById('budget-bar');
+    if (budgetBar) {
+        const percentage = budgetBar.getAttribute('data-percentage');
+        budgetBar.style.width = percentage + '%';
+    }
+    
     const ctx = document.getElementById('categoryPieChart').getContext('2d');
     
     // Get data from Flask template
-    const categoryData = {
-        labels: [
-            {% for category, amount in category_data.items() %}
-                "{{ category }}",
-            {% endfor %}
-        ],
-        data: [
-            {% for category, amount in category_data.items() %}
-                {{ amount }},
-            {% endfor %}
-        ]
-    };
+    // Data is provided as a JSON string in a data attribute
+    const categoryDataStr = `{
+        "labels": [{% for category, amount in category_data.items() %}"{{ category }}",{% endfor %}],
+        "data": [{% for category, amount in category_data.items() %}{{ amount }},{% endfor %}]
+    }`;
+    
+    // Parse the JSON string
+    const categoryData = JSON.parse(categoryDataStr.replace(/,]/g, ']'));
     
     // Colors for the chart
     const backgroundColors = [

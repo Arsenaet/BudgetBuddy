@@ -87,7 +87,9 @@
                 <p class="text-gray-600 mb-4">Your current spending progress</p>
                 <div class="text-3xl font-semibold text-green-600 mb-2">${{ total_spent }} of $2000.00</div>
                 <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                    <div class="bg-green-500 h-2.5 rounded-full" style="width: {{ (total_spent / 2000) * 100 }}%"></div>
+                    <div class="bg-green-500 h-2.5 rounded-full" 
+                         id="insights-budget-bar" 
+                         data-percentage="{{ (total_spent / 2000) * 100 }}"></div>
                 </div>
                 <div class="flex justify-between items-center mb-4">
                     <div>
@@ -147,15 +149,15 @@
                 </div>
             </div>
         </div>
-        <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md mt-6">
-            <h3 class="text-lg font-semibold mb-4">Ask Budget Buddy</h3>
+        <div class="bg-white p-6 rounded-lg shadow mt-6">
+            <h3 class="text-xl font-semibold mb-4">Ask Budget Buddy</h3>
             <p class="text-gray-600 mb-4">Have a question about your budget? Ask away!</p>
             <form action="/insights" method="post" class="flex flex-col gap-2">
                 <input type="text" name="query" placeholder="e.g., How can I save more money?" class="border p-2 rounded">
                 <button type="submit" class="bg-blue-500 text-white p-2 rounded">Ask</button>
             </form>
             <div class="mt-4 p-4 border border-gray-200 rounded-lg">
-                <h4 class="font-semibold mb-2">Answer:</h4>
+                <h4 class="font-semibold mb-2">Insights:</h4>
                 <div>{{ prompt_result if prompt_result else "Ask a question about your budget." }}</div>
             </div>
         </div>
@@ -167,21 +169,24 @@
 
         // Set up charts only if we have data
         document.addEventListener('DOMContentLoaded', function() {
+            // Apply budget bar width from data attribute
+            const budgetBar = document.getElementById('insights-budget-bar');
+            if (budgetBar) {
+                const percentage = budgetBar.getAttribute('data-percentage');
+                budgetBar.style.width = percentage + '%';
+            }
+            
             // Set up pie chart
             const pieCtx = document.getElementById('categoryPieChart');
             if (pieCtx) {
-                const categoryData = {
-                    labels: [
-                        {% for category, amount in category_data.items() %}
-                            "{{ category }}",
-                        {% endfor %}
-                    ],
-                    data: [
-                        {% for category, amount in category_data.items() %}
-                            {{ amount }},
-                        {% endfor %}
-                    ]
-                };
+                // Data is provided as a JSON string in a data attribute
+                const categoryDataStr = `{
+                    "labels": [{% for category, amount in category_data.items() %}"{{ category }}",{% endfor %}],
+                    "data": [{% for category, amount in category_data.items() %}{{ amount }},{% endfor %}]
+                }`;
+                
+                // Parse the JSON string
+                const categoryData = JSON.parse(categoryDataStr.replace(/,]/g, ']'));
                 
                 // Only create chart if we have data
                 if (categoryData.labels.length > 0) {
@@ -243,17 +248,15 @@
             const lineCtx = document.getElementById('spendingTrendChart');
             if (lineCtx) {
                 // Set up line chart data based on most recent items
-                const dates = [
-                    {% for item in items[:5]|sort(attribute='date_created', reverse=True) %}
-                        "{{ item.date_created.strftime('%b %d') }}",
-                    {% endfor %}
-                ];
+                const lineDataStr = `{
+                    "dates": [{% for item in items[:5]|sort(attribute='date_created', reverse=True) %}"{{ item.date_created.strftime('%b %d') }}",{% endfor %}],
+                    "amounts": [{% for item in items[:5]|sort(attribute='date_created', reverse=True) %}{{ item.cost }},{% endfor %}]
+                }`;
                 
-                const amounts = [
-                    {% for item in items[:5]|sort(attribute='date_created', reverse=True) %}
-                        {{ item.cost }},
-                    {% endfor %}
-                ];
+                // Parse the JSON string
+                const lineData = JSON.parse(lineDataStr.replace(/,]/g, ']'));
+                const dates = lineData.dates;
+                const amounts = lineData.amounts;
                 
                 if (dates.length > 0) {
                     new Chart(lineCtx, {
@@ -280,29 +283,6 @@
                     });
                 }
             }
-        });
-        
-        // Handle form submission and AJAX request
-        document.getElementById("queryForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            
-            const userQuery = document.getElementById("userQuery").value;
-            
-            fetch("/submit", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ userQuery: userQuery })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("promptresult").innerHTML = data.prompt_result || "Error processing query.";
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                document.getElementById("promptresult").innerText = "An error occurred.";
-            });
         });
     </script>
 </body>

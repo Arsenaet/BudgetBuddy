@@ -69,30 +69,10 @@
             
             {% if not category_data %}
             <div class="col-span-full text-center py-8 text-gray-500">
-                <p>No items added yet. Add your first budget item to get started!</p>
+                <p>No items added yet. Add your first budget item on the Dashboard or Expenses page!</p>
             </div>
             {% endif %}
         </div>
-    </section>
-    
-    <!-- Add New Item Section -->
-    <section class="mb-8 border-2 border-gray-200 rounded-lg p-4">
-        <h2 class="text-xl font-semibold mb-4">Add New Item</h2>
-        <p class="text-gray-600 mb-4">Quickly add a new budget item</p>
-        
-        <form action="/categories" method="POST" class="bg-white p-4 rounded-lg shadow max-w-md mx-auto">
-            <div class="mb-4">
-                <label for="item" class="block text-gray-700 mb-2">Item Name</label>
-                <input type="text" id="item" name="item" class="w-full p-2 border border-gray-300 rounded" required>
-            </div>
-            <div class="mb-4">
-                <label for="cost" class="block text-gray-700 mb-2">Cost</label>
-                <input type="number" id="cost" name="cost" class="w-full p-2 border border-gray-300 rounded" required>
-            </div>
-            <button type="submit" class="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
-                Add Item
-            </button>
-        </form>
     </section>
     
     <!-- Category Comparison Chart -->
@@ -116,24 +96,21 @@
         var menu = document.getElementById('mobile-menu');
         menu.classList.toggle('hidden');
     });
+</script>
 
-    // Only run chart code if we have category data
-    {% if category_data %}
+{% if category_data %}
+<script>
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('categoryChart').getContext('2d');
         
-        const chartData = {
-            labels: [
-                {% for category, amount in category_data.items() %}
-                    "{{ category }}",
-                {% endfor %}
-            ],
-            data: [
-                {% for category, amount in category_data.items() %}
-                    {{ amount }},
-                {% endfor %}
-            ]
-        };
+        // Data is provided as a JSON string in a data attribute
+        const chartDataStr = `{
+            "labels": [{% for category, amount in category_data.items() %}"{{ category }}",{% endfor %}],
+            "data": [{% for category, amount in category_data.items() %}{{ amount }},{% endfor %}]
+        }`;
+        
+        // Parse the JSON string
+        const chartData = JSON.parse(chartDataStr.replace(/,]/g, ']'));
 
         new Chart(ctx, {
             type: 'bar',
@@ -172,7 +149,7 @@
             }
         });
     });
-    {% endif %}
 </script>
+{% endif %}
 </body>
 </html>

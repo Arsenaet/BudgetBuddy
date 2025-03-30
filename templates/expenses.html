@@ -85,8 +85,26 @@
             </h3>
             <form class="mt-4" action="/expenses" method="POST">
                 <div class="mb-4">
-                    <label class="block text-gray-700">Item Name</label>
-                    <input type="text" name="item" class="w-full border border-gray-300 rounded-lg p-2 mt-1" required>
+                    <label class="block text-gray-700">Category</label>
+                    <select name="item" class="w-full border border-gray-300 rounded-lg p-2 mt-1" required>
+                        <option value="" disabled selected>Select a category</option>
+                        <option value="Housing">Housing</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Groceries">Groceries</option>
+                        <option value="Dining">Dining</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Insurance">Insurance</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Investments">Investments</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Personal Care">Personal Care</option>
+                        <option value="Subscriptions">Subscriptions</option>
+                        <option value="Travel">Travel</option>
+                        <option value="Fitness">Fitness</option>
+                        <option value="Pets">Pets</option>
+                        <option value="Technology">Technology</option>
+                    </select>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700">Cost</label>

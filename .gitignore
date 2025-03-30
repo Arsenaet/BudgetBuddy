@@ -37,3 +37,7 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db 
+
+# Perplexity API
+perplexity_api_key.txt
+
