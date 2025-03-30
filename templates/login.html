@@ -96,6 +96,41 @@
         .dark .divider::after {
             border-bottom-color: #374151; /* dark-700 */
         }
+        /* Google Sign-in button styling */
+        .g_id_signin iframe {
+            border-radius: 0.5rem !important; /* rounded-lg */
+        }
+        #g_id_onload iframe, #g_id_onload_register iframe, 
+        .g_id_signin div[role="button"], .g_id_signin iframe {
+            border-radius: 0.5rem !important;
+        }
+
+        /* Google Sign-in button styling */
+        .google-btn-wrapper {
+            border-radius: 0.5rem !important; /* rounded-lg */
+            overflow: hidden !important;
+        }
+        .google-btn-wrapper iframe {
+            border-radius: 0.5rem !important;
+        }
+        .g_id_signin div[role="button"] {
+            border-radius: 0.5rem !important;
+        }
+        /* Fix any parent containers that might be affecting the button */
+        .g_id_signin > div, 
+        .g_id_signin > div > div, 
+        .g_id_signin > div > div > div,
+        .g_id_signin > div > div > div > div {
+            border-radius: 0.5rem !important;
+        }
+        /* Apply same hover effect as other social buttons */
+        .google-btn-wrapper {
+            transition: all 0.3s ease;
+        }
+        .google-btn-wrapper:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-dark-900 min-h-screen flex flex-col">
@@ -142,7 +177,7 @@
                         data-callback="handleGoogleSignIn"
                         data-auto_prompt="false">
                     </div>
-                    <div class="g_id_signin"
+                    <div class="g_id_signin google-btn-wrapper rounded-lg overflow-hidden"
                         data-type="standard"
                         data-shape="rectangular"
                         data-theme="outline"
@@ -164,15 +199,17 @@
                 <div class="divider mb-6">OR</div>
                 
                 <!-- Email Login Form -->
-                <form>
+                <form method="post" action="/login">
                     <div class="mb-4">
-                        <label for="login-email" class="block text-gray-700 dark:text-dark-400 mb-2">Email</label>
-                        <input type="email" id="login-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <label for="login-username" class="block text-gray-700 dark:text-dark-400 mb-2">Username</label>
+                        <input type="text" id="login-username" name="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                     </div>
                     <div class="mb-6">
                         <label for="login-password" class="block text-gray-700 dark:text-dark-400 mb-2">Password</label>
-                        <input type="password" id="login-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                        <a href="#" class="text-sm text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300 mt-1 inline-block">Forgot password?</a>
+                        <input type="password" id="login-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        {% if error_message %}
+                        <span class="text-sm text-red-500 dark:text-red-400 mt-1 inline-block">{{ error_message }}</span>
+                        {% endif %}
                     </div>
                     <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors duration-200">
                         Sign In
@@ -197,7 +234,7 @@
                         data-callback="handleGoogleSignIn"
                         data-auto_prompt="false">
                     </div>
-                    <div class="g_id_signin"
+                    <div class="g_id_signin google-btn-wrapper rounded-lg overflow-hidden"
                         data-type="standard"
                         data-shape="rectangular"
                         data-theme="outline"
@@ -219,19 +256,24 @@
                 <div class="divider mb-6">OR</div>
                 
                 <!-- Email Register Form -->
-                <form id="registration-form">
+                <form id="registration-form" method="post" action="/register">
+                    {% if error_message %}
+                    <div class="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded-lg dark:bg-red-900 dark:border-red-700 dark:text-red-300">
+                        <p>{{ error_message }}</p>
+                    </div>
+                    {% endif %}
                     <div class="mb-4">
-                        <label for="register-name" class="block text-gray-700 dark:text-dark-400 mb-2">Full Name</label>
-                        <input type="text" id="register-name" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <label for="register-username" class="block text-gray-700 dark:text-dark-400 mb-2">Username</label>
+                        <input type="text" id="register-username" name="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                     </div>
                     <div class="mb-4">
                         <label for="register-email" class="block text-gray-700 dark:text-dark-400 mb-2">Email</label>
-                        <input type="email" id="register-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <input type="email" id="register-email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                     </div>
                     <div class="mb-4">
                         <label for="register-password" class="block text-gray-700 dark:text-dark-400 mb-2">Password</label>
-                        <input type="password" id="register-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                        <div class="mt-2 text-sm">
+                        <input type="password" id="register-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <div class="mt-2 text-sm password-requirements hidden">
                             <p class="password-requirement" id="length"><i class="fas fa-check-circle valid hidden"></i><i class="fas fa-times-circle invalid"></i> At least 8 characters</p>
                             <p class="password-requirement" id="uppercase"><i class="fas fa-check-circle valid hidden"></i><i class="fas fa-times-circle invalid"></i> At least 1 uppercase letter</p>
                             <p class="password-requirement" id="lowercase"><i class="fas fa-check-circle valid hidden"></i><i class="fas fa-times-circle invalid"></i> At least 1 lowercase letter</p>
@@ -241,10 +283,10 @@
                     </div>
                     <div class="mb-6">
                         <label for="register-confirm-password" class="block text-gray-700 dark:text-dark-400 mb-2">Confirm Password</label>
-                        <input type="password" id="register-confirm-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                        <div class="mt-2 text-sm">
-                            <p class="password-match"><i class="fas fa-check-circle valid"></i> Passwords match</p>
-                            <p class="password-mismatch"><i class="fas fa-times-circle invalid"></i> Passwords don't match</p>
+                        <input type="password" id="register-confirm-password" name="confirm_password" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-dark-700 dark:border-dark-600 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <div class="mt-2 text-sm password-match-container hidden">
+                            <p class="password-match hidden"><i class="fas fa-check-circle valid"></i> Passwords match</p>
+                            <p class="password-mismatch hidden"><i class="fas fa-times-circle invalid"></i> Passwords don't match</p>
                         </div>
                     </div>
                     <button type="submit" id="register-button" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
@@ -261,7 +303,7 @@
     <!-- Footer -->
     <footer class="bg-white shadow dark:bg-dark-800 py-4">
         <div class="container mx-auto px-4 text-center text-gray-600 dark:text-dark-400">
-            <p>&copy; 2023 Budget Buddy. All rights reserved.</p>
+            <p>&copy; 2025 Budget Buddy. All rights reserved.</p>
         </div>
     </footer>
 
@@ -347,6 +389,10 @@
 
         // Check password requirements
         function checkPasswordRequirements(password) {
+            if (!password) {
+                return false; // No validation if password is empty
+            }
+            
             // Check length
             const lengthValid = password.length >= 8;
             document.getElementById('length').querySelector('.valid').classList.toggle('hidden', !lengthValid);
@@ -368,10 +414,11 @@
             document.getElementById('number').querySelector('.invalid').classList.toggle('hidden', numberValid);
 
             // Check special character
-            const specialValid = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            const specialValid = /[^A-Za-z0-9]/.test(password);
             document.getElementById('special').querySelector('.valid').classList.toggle('hidden', !specialValid);
             document.getElementById('special').querySelector('.invalid').classList.toggle('hidden', specialValid);
 
+            // Return whether all requirements are met
             return lengthValid && uppercaseValid && lowercaseValid && numberValid && specialValid;
         }
 
@@ -379,20 +426,23 @@
         function checkPasswordMatch() {
             const password = passwordInput.value;
             const confirmPassword = confirmPasswordInput.value;
-
+            const passwordMatchContainer = document.querySelector('.password-match-container');
+            const passwordMatch = document.querySelector('.password-match');
+            const passwordMismatch = document.querySelector('.password-mismatch');
+            
+            // Show the container if there's any input in both fields
             if (password && confirmPassword) {
+                passwordMatchContainer.classList.remove('hidden');
                 if (password === confirmPassword) {
-                    passwordMatch.style.display = 'block';
-                    passwordMismatch.style.display = 'none';
+                    passwordMatch.classList.remove('hidden');
+                    passwordMismatch.classList.add('hidden');
                     return true;
                 } else {
-                    passwordMatch.style.display = 'none';
-                    passwordMismatch.style.display = 'block';
+                    passwordMatch.classList.add('hidden');
+                    passwordMismatch.classList.remove('hidden');
                     return false;
                 }
             }
-            passwordMatch.style.display = 'none';
-            passwordMismatch.style.display = 'none';
             return false;
         }
 
@@ -400,34 +450,36 @@
         function validateForm() {
             const passwordValid = checkPasswordRequirements(passwordInput.value);
             const passwordsMatch = checkPasswordMatch();
-            const nameValid = document.getElementById('register-name').value.trim() !== '';
+            const usernameValid = document.getElementById('register-username').value.trim() !== '';
             const emailValid = document.getElementById('register-email').value.trim() !== '';
 
-            registerButton.disabled = !(passwordValid && passwordsMatch && nameValid && emailValid);
+            registerButton.disabled = !(passwordValid && passwordsMatch && usernameValid && emailValid);
         }
 
         // Event listeners for validation
         passwordInput.addEventListener('input', () => {
+            // Show password requirements when the user starts typing
+            document.querySelector('.password-requirements').classList.remove('hidden');
             checkPasswordRequirements(passwordInput.value);
             checkPasswordMatch();
             validateForm();
         });
 
         confirmPasswordInput.addEventListener('input', () => {
+            // Show password match container when user starts typing
+            document.querySelector('.password-match-container').classList.remove('hidden');
             checkPasswordMatch();
             validateForm();
         });
 
-        document.getElementById('register-name').addEventListener('input', validateForm);
+        document.getElementById('register-username').addEventListener('input', validateForm);
         document.getElementById('register-email').addEventListener('input', validateForm);
 
-        // Form submission
+        // Form submission - Client-side validation only
         document.getElementById('registration-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (!registerButton.disabled) {
-                // Form is valid, proceed with registration
-                alert('Registration successful!');
-                // Here you would typically send the data to your server
+            if (registerButton.disabled) {
+                e.preventDefault();
+                alert('Please fix the form errors before submitting.');
             }
         });
 
@@ -468,13 +520,39 @@
 
         // Regular form login handler
         document.querySelector('#login-form form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
+            // We're submitting through the form post now, no need for JavaScript handling
+            // Let the form's action and method handle the submission
+        });
+    </script>
+
+    <!-- Add Google button styling script -->
+    <script>
+        // This function runs after page loads to apply custom styling to Google buttons
+        window.addEventListener('load', function() {
+            // Function to apply styles to Google buttons
+            function styleGoogleButtons() {
+                // Find all Google button containers and apply rounded corners
+                const googleButtons = document.querySelectorAll('.g_id_signin iframe');
+                googleButtons.forEach(function(btn) {
+                    if (btn.contentDocument && btn.contentDocument.body) {
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            .S9gUrf-YoZ4jf, .nsm7Bb-HzV7m-LgbsSe {
+                                border-radius: 0.5rem !important;
+                                overflow: hidden !important;
+                            }
+                        `;
+                        btn.contentDocument.head.appendChild(style);
+                    }
+                });
+            }
             
-            // Here you would typically validate and send to your backend
-            console.log('Login attempt with:', email, password);
-            alert('Login form submitted! (Would authenticate with backend)');
+            // Try to style buttons immediately
+            styleGoogleButtons();
+            
+            // Also try after a slight delay to ensure Google buttons are loaded
+            setTimeout(styleGoogleButtons, 500);
+            setTimeout(styleGoogleButtons, 1000);
         });
     </script>
 </body>

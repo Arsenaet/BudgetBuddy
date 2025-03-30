@@ -4,15 +4,17 @@ import logging
 import re
 from datetime import datetime
 
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, session
 import sqlalchemy
 from flask_sqlalchemy import SQLAlchemy
 from markdown import markdown
 from waitress import serve
+from werkzeug.security import generate_password_hash, check_password_hash
 from PerpLibs import Request, Textonly
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SECRET_KEY'] = 'your-secret-key-here'  # Added for session support
 db = SQLAlchemy(app)
 
 class Todo(db.Model):
@@ -21,6 +23,7 @@ class Todo(db.Model):
     name = db.Column(db.String(200), nullable=False, default="Unnamed Item")  # Item name
     cost = db.Column(db.Float, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
         return f'<Item {self.id}: {self.name}>'
@@ -33,14 +36,113 @@ class Budget(db.Model):
     def __repr__(self):
         return f'<Budget ${self.monthly_amount}>'
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.now)
+    todos = db.relationship('Todo', backref='user', lazy=True)
+    
+    def __repr__(self):
+        return f'<User {self.username}>'
+
 @app.route("/", methods=['GET'])
 @app.route("/index", methods=['GET'])
 def index():
-    """Redirect to dashboard."""
-    return redirect('/dashboard')
+    """Redirect to login page."""
+    return redirect('/login')
 
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    """Display login page and handle login logic."""
+    error_message = None
+    
+    if request.method == 'POST':
+        # Get credentials from form
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if not username or not password:
+            error_message = "Username and password are required"
+        else:
+            # Find the user
+            user = User.query.filter_by(username=username).first()
+            
+            # Check if user exists and password is correct
+            if user and check_password_hash(user.password, password):
+                session['logged_in'] = True
+                session['username'] = user.username
+                session['user_id'] = user.id
+                return redirect('/dashboard')
+            else:
+                error_message = "Invalid username or password"
+    
+    return render_template('login.html', error_message=error_message)
+
+@app.route('/logout')
+def logout():
+    """Handle user logout."""
+    # Clear the session
+    session.clear()
+    return redirect('/login')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """Handle user registration."""
+    if request.method == 'POST':
+        # Get form data
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        # Basic validation
+        if not username or not email or not password:
+            return render_template('login.html', error_message="All fields are required")
+        
+        # Check if username or email already exists
+        existing_user = User.query.filter((User.username == username) | (User.email == email)).first()
+        if existing_user:
+            return render_template('login.html', error_message="Username or email already exists")
+        
+        # Create new user with hashed password using SHA-256
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        new_user = User(username=username, email=email, password=hashed_password)
+        
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            
+            # Log the user in - make sure to set the user_id
+            session['logged_in'] = True
+            session['username'] = username
+            session['user_id'] = new_user.id
+            
+            # Create a default budget for the new user
+            default_budget = Budget(monthly_amount=2000.0)
+            db.session.add(default_budget)
+            db.session.commit()
+            
+            return redirect('/dashboard')
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error creating user: {e}")
+            return render_template('login.html', error_message=f"Registration failed: {str(e)}")
+    
+    # GET requests are redirected to login page where the registration form exists
+    return redirect('/login')
+
+def login_required(f):
+    """Decorator to require login for views."""
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect('/login')
+        return f(*args, **kwargs)
+    decorated_function.__name__ = f.__name__
+    return decorated_function
 
 @app.route("/dashboard", methods=['GET', 'POST'])
+@login_required
 def dashboard():
     """Display the main dashboard with budget overview."""
     if request.method == 'POST':
@@ -51,7 +153,8 @@ def dashboard():
         
         try:
             item_cost = float(item_cost)
-            new_item = Todo(item=item_category, name=item_name, cost=item_cost)
+            user_id = session.get('user_id')
+            new_item = Todo(item=item_category, name=item_name, cost=item_cost, user_id=user_id)
             
             # Set custom date if provided, otherwise use current date
             if item_date:
@@ -67,7 +170,8 @@ def dashboard():
             app.logger.error("Value error: %s", e)
             return 'Invalid cost value'
     
-    items = Todo.query.all()
+    user_id = session.get('user_id')
+    items = Todo.query.filter_by(user_id=user_id).all()
     total_spent = sum(item.cost for item in items)
     
     # Get current budget
@@ -88,8 +192,8 @@ def dashboard():
     # Get today's date for the date input default
     today_date = datetime.now().strftime('%Y-%m-%d')
     
-    # Mock username for demo
-    username = "Demo User"
+    # Get username from session
+    username = session.get('username', 'Demo User')
     
     return render_template('dashboard.html', 
                           items=items,
@@ -102,6 +206,7 @@ def dashboard():
 
 
 @app.route('/expenses', methods=['GET', 'POST'])
+@login_required
 def expenses():
     """Display the expenses management page and handle new expenses."""
     if request.method == 'POST':
@@ -112,7 +217,8 @@ def expenses():
         
         try:
             item_cost = float(item_cost)
-            new_item = Todo(item=item_category, name=item_name, cost=item_cost)
+            user_id = session.get('user_id')
+            new_item = Todo(item=item_category, name=item_name, cost=item_cost, user_id=user_id)
             
             # Set custom date if provided, otherwise use current date
             if item_date:
@@ -128,21 +234,24 @@ def expenses():
             app.logger.error("Value error: %s", e)
             return 'Invalid cost value'
     
-    items = Todo.query.order_by(Todo.date_created.desc()).all()
+    user_id = session.get('user_id')
+    items = Todo.query.filter_by(user_id=user_id).order_by(Todo.date_created.desc()).all()
     
     # Get today's date for the date input default
     today_date = datetime.now().strftime('%Y-%m-%d')
     
-    # Mock username for demo
-    username = "Demo User"
+    # Get username from session
+    username = session.get('username', 'Demo User')
     
     return render_template('expenses.html', items=items, today_date=today_date, username=username)
 
 
 @app.route('/categories')
+@login_required
 def categories():
     """Display expense categories."""
-    items = Todo.query.all()
+    user_id = session.get('user_id')
+    items = Todo.query.filter_by(user_id=user_id).all()
     
     # Categorize spending
     category_data = {}
@@ -152,8 +261,8 @@ def categories():
         else:
             category_data[item.item] = item.cost
     
-    # Mock username for demo
-    username = "Demo User"
+    # Get username from session
+    username = session.get('username', 'Demo User')
     
     return render_template('categories.html', 
                           category_data=category_data,
@@ -162,6 +271,7 @@ def categories():
 
 
 @app.route('/delete/<int:item_id>')
+@login_required
 def delete(item_id):
     """Delete a budget item from the database by its ID."""
     item_to_delete = Todo.query.get_or_404(item_id)
@@ -176,6 +286,7 @@ def delete(item_id):
     
 
 @app.route('/update/<int:item_id>', methods=['GET', 'POST'])
+@login_required
 def update(item_id):
     """Update an existing budget item by its ID."""
     item = Todo.query.get_or_404(item_id)
@@ -201,12 +312,13 @@ def update(item_id):
             return 'There was an issue updating your item'
 
     else:
-        # Mock username for demo
-        username = "Demo User"
+        # Get username from session
+        username = session.get('username', 'Demo User')
         return render_template('update.html', item=item, username=username)
 
 
 @app.route('/insights', methods=['GET', 'POST'])
+@login_required
 def insights():
     """Display budget insights and analysis."""
     prompt_result = None
@@ -218,7 +330,8 @@ def insights():
             full_query = user_query + restrictions
             
             # Get current spending data from the database
-            items = Todo.query.all()
+            user_id = session.get('user_id')
+            items = Todo.query.filter_by(user_id=user_id).all()
             current_spending_table = "\nCurrent Spending Items:\n"
             total_cost = 0
             
@@ -242,7 +355,8 @@ def insights():
                 app.logger.error("Perplexity API error: %s", e)
                 prompt_result = f"Error connecting to AI service: {str(e)}"
     
-    items = Todo.query.all()
+    user_id = session.get('user_id')
+    items = Todo.query.filter_by(user_id=user_id).all()
     total_spent = sum(item.cost for item in items)
     
     # Get current budget
@@ -260,8 +374,8 @@ def insights():
     # Find highest spending category
     highest_category = max(category_data.items(), key=lambda x: x[1]) if category_data else ("None", 0)
     
-    # Mock username for demo
-    username = "Demo User"
+    # Get username from session
+    username = session.get('username', 'Demo User')
     
     return render_template('insights.html', 
                           items=items,
@@ -281,6 +395,7 @@ def internal_error(error):
 
 
 @app.route("/submit", methods=["POST"])
+@login_required
 def submit():
     """Process queries using Perplexity API and return results."""
     try:
@@ -294,7 +409,8 @@ def submit():
 
         
         # Get current spending data from the database
-        items = Todo.query.all()
+        user_id = session.get('user_id')
+        items = Todo.query.filter_by(user_id=user_id).all()
         current_spending_table = "\nCurrent Spending Items:\n"
         total_cost = 0
         
@@ -325,6 +441,7 @@ def submit():
 
 
 @app.route('/migrate_db', methods=['GET'])
+@login_required
 def migrate_db():
     """Add 'name' field to existing items that don't have it."""
     try:
@@ -343,7 +460,9 @@ def migrate_db():
             return "Database structure needs to be updated. Please restart the application to apply schema changes."
         
         # If we got here, the column exists, so just populate any NULL values
-        items = Todo.query.all()
+        # Only update items for the current user
+        user_id = session.get('user_id')
+        items = Todo.query.filter_by(user_id=user_id).all()
         for item in items:
             if not item.name:
                 item.name = f"{item.item} item"
@@ -355,6 +474,7 @@ def migrate_db():
         return f"Migration failed: {str(e)}"
 
 @app.route("/set_budget", methods=['POST'])
+@login_required
 def set_budget():
     """Update the monthly budget amount."""
     try:
@@ -382,6 +502,7 @@ def set_budget():
         return "An error occurred while setting the budget"
 
 @app.route("/get_ai_insights", methods=['POST'])
+@login_required
 def get_ai_insights():
     """Generate AI insights based on recent transactions and spending patterns."""
     try:
@@ -391,7 +512,8 @@ def get_ai_insights():
         cost = request.json.get('cost', None)
         
         # Get spending data
-        items = Todo.query.all()
+        user_id = session.get('user_id')
+        items = Todo.query.filter_by(user_id=user_id).all()
         total_spent = sum(item.cost for item in items)
         
         # Get current budget
@@ -454,46 +576,54 @@ def get_ai_insights():
         app.logger.error(f"Error generating AI insights: {e}")
         return jsonify({'insights': f"<p>Error generating insights: {str(e)}</p>"}), 500
 
-# Create database tables
+# Create database tables with proper user_id foreign key support
 with app.app_context():
-    # Need to drop and recreate tables to add the name field
-    try:
-        # First try to back up existing data
-        items_backup = []
-        try:
-            # Use raw SQL to bypass the ORM which would try to load the non-existent name column
-            with db.engine.connect() as conn:
-                result = conn.execute(sqlalchemy.text("SELECT id, item, cost, date_created FROM todo"))
-                for row in result:
-                    items_backup.append({
-                        'item': row[1],
-                        'cost': row[2],
-                        'date_created': row[3]
-                    })
-            app.logger.info(f"Backed up {len(items_backup)} items")
-        except Exception as e:
-            app.logger.warning(f"Could not back up data: {e}")
-        
-        # Drop and recreate tables
-        db.drop_all()
+    # Check if the inspector can see the tables
+    inspector = sqlalchemy.inspect(db.engine)
+    tables = inspector.get_table_names()
+    
+    # Check if we need to create tables
+    if not tables or 'user' not in tables:
+        app.logger.info("Creating all database tables")
         db.create_all()
-        
-        # Restore data with new name field
-        for item_data in items_backup:
-            migrated_item = Todo(
-                item=item_data['item'],
-                name=f"{item_data['item']} item",  # Default name based on category
-                cost=item_data['cost'],
-                date_created=item_data['date_created']
-            )
-            db.session.add(migrated_item)
-        
+    else:
+        # Just make sure all tables are created without dropping
+        db.create_all()
+        app.logger.info("Database tables already exist, ensuring all tables are created")
+    
+    # Check if we have any users
+    user_count = User.query.count()
+    if user_count == 0:
+        # Create demo user
+        demo_password = generate_password_hash('demo123', method='pbkdf2:sha256')
+        demo_user = User(
+            username='demo',
+            email='demo@example.com',
+            password=demo_password
+        )
+        db.session.add(demo_user)
         db.session.commit()
-        app.logger.info("Database tables recreated with name field")
-    except Exception as e:
-        db.create_all()
-        app.logger.error(f"Error recreating tables: {e}")
-        app.logger.info("Fresh database tables created")
+        
+        # Create default budget
+        default_budget = Budget(monthly_amount=2000.0)
+        db.session.add(default_budget)
+        db.session.commit()
+        
+        # If there are any existing Todo items without user_id, assign them to demo user
+        try:
+            demo_user_id = demo_user.id
+            orphan_todos = Todo.query.filter(Todo.user_id == None).all()
+            for todo in orphan_todos:
+                todo.user_id = demo_user_id
+            db.session.commit()
+            if orphan_todos:
+                app.logger.info(f"Assigned {len(orphan_todos)} existing Todo items to demo user")
+        except Exception as e:
+            app.logger.error(f"Error migrating orphan todos: {e}")
+        
+        app.logger.info("Created demo user and default budget")
+    else:
+        app.logger.info(f"Database has {user_count} existing users")
 
 if __name__ == "__main__":
     # Configure logging
