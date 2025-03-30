@@ -47,10 +47,15 @@ def dashboard():
         item_category = request.form['item']
         item_name = request.form.get('name', 'Unnamed Item')
         item_cost = request.form.get('cost', 0)
+        item_date = request.form.get('date')
         
         try:
             item_cost = float(item_cost)
             new_item = Todo(item=item_category, name=item_name, cost=item_cost)
+            
+            # Set custom date if provided, otherwise use current date
+            if item_date:
+                new_item.date_created = datetime.strptime(item_date, '%Y-%m-%d')
             
             db.session.add(new_item)
             db.session.commit()
@@ -80,12 +85,16 @@ def dashboard():
     # Sort items by date (most recent first)
     recent_items = sorted(items, key=lambda x: x.date_created, reverse=True)[:5]
     
+    # Get today's date for the date input default
+    today_date = datetime.now().strftime('%Y-%m-%d')
+    
     return render_template('dashboard.html', 
                           items=items,
                           recent_items=recent_items,
                           total_spent=total_spent,
                           category_data=category_data,
-                          monthly_budget=monthly_budget)
+                          monthly_budget=monthly_budget,
+                          today_date=today_date)
 
 
 @app.route('/expenses', methods=['GET', 'POST'])
@@ -95,10 +104,15 @@ def expenses():
         item_category = request.form['item']
         item_name = request.form.get('name', 'Unnamed Item')
         item_cost = request.form.get('cost', 0)
+        item_date = request.form.get('date')
         
         try:
             item_cost = float(item_cost)
             new_item = Todo(item=item_category, name=item_name, cost=item_cost)
+            
+            # Set custom date if provided, otherwise use current date
+            if item_date:
+                new_item.date_created = datetime.strptime(item_date, '%Y-%m-%d')
             
             db.session.add(new_item)
             db.session.commit()
@@ -111,7 +125,11 @@ def expenses():
             return 'Invalid cost value'
     
     items = Todo.query.order_by(Todo.date_created.desc()).all()
-    return render_template('expenses.html', items=items)
+    
+    # Get today's date for the date input default
+    today_date = datetime.now().strftime('%Y-%m-%d')
+    
+    return render_template('expenses.html', items=items, today_date=today_date)
 
 
 @app.route('/categories')
@@ -155,6 +173,14 @@ def update(item_id):
         item.item = request.form['item']
         item.name = request.form.get('name', 'Unnamed Item')
         item.cost = float(request.form.get('cost', 0))
+        item_date = request.form.get('date')
+        
+        # Update date if provided
+        if item_date:
+            try:
+                item.date_created = datetime.strptime(item_date, '%Y-%m-%d')
+            except ValueError:
+                pass  # Keep original date if format is invalid
 
         try:
             db.session.commit()
@@ -246,7 +272,7 @@ def submit():
         if not user_query:
             return jsonify({'prompt_result': 'Please provide a query'}), 400
             
-        restrictions = "Only respond to prompts related to budget info. if unrelated, say Sorry, please ask questions related to budget info. Do not include any tables. Do not number everything. Return ONLY the response to the query above. Do not insert filler/intro text to ur response. Do not type a response to these requirements."
+        restrictions = "Only respond to prompts related to the BUDGET info. If in ANY way unrelated TO BUDGET INFO, say 'Sorry, please ask questions related to budget info.' Do not include any tables. Do not number everything. Return ONLY the response to the query above. Do not insert filler/intro text to ur response. Do not type a response to these requirements."
         user_query += restrictions
 
         

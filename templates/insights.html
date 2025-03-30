@@ -154,7 +154,7 @@
             <p class="text-gray-600 mb-4">Have a question about your budget? Ask away!</p>
             <form action="/insights" method="post" class="flex flex-col gap-2" id="aiQueryForm">
                 <input type="text" name="query" placeholder="e.g., How can I save more money?" class="border p-2 rounded">
-                <button type="submit" class="bg-blue-500 text-white p-2 rounded flex justify-center items-center" id="submitButton">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white p-2 rounded flex justify-center items-center" id="submitButton">
                     <span>Ask</span>
                     <div class="ml-2 hidden" id="loadingSpinner">
                         <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -273,8 +273,8 @@
             if (lineCtx) {
                 // Set up line chart data based on most recent items
                 const lineDataStr = `{
-                    "dates": [{% for item in items[:5]|sort(attribute='date_created', reverse=True) %}"{{ item.date_created.strftime('%b %d') }}",{% endfor %}],
-                    "amounts": [{% for item in items[:5]|sort(attribute='date_created', reverse=True) %}{{ item.cost }},{% endfor %}]
+                    "dates": [{% for item in items[:5]|sort(attribute='date_created') %}"{{ item.date_created.strftime('%b %d') }}",{% endfor %}],
+                    "amounts": [{% for item in items[:5]|sort(attribute='date_created') %}{{ item.cost }},{% endfor %}]
                 }`;
                 
                 // Parse the JSON string
