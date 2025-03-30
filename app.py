@@ -559,19 +559,19 @@ def get_ai_insights():
         
         # Process the query using Perplexity API
         response = Request(query)
-        insights = Textonly(response)
+        ai_response = Textonly(response)
         
         # Clean up the response
-        insights = re.sub(r'\[\d+\]', '', insights)
+        ai_response = re.sub(r'\[\d+\]', '', ai_response)
         
         # Remove markdown asterisks if they appear
-        insights = re.sub(r'\*\*(.*?)\*\*', r'\1', insights)  # Remove bold markdown
-        insights = re.sub(r'\*(.*?)\*', r'\1', insights)      # Remove italic markdown
+        ai_response = re.sub(r'\*\*(.*?)\*\*', r'\1', ai_response)  # Remove bold markdown
+        ai_response = re.sub(r'\*(.*?)\*', r'\1', ai_response)      # Remove italic markdown
         
         # Convert any remaining markdown to HTML
-        insights = markdown(insights)
+        ai_response = markdown(ai_response)
         
-        return jsonify({'insights': insights})
+        return jsonify({'insights': ai_response})
     except Exception as e:
         app.logger.error(f"Error generating AI insights: {e}")
         return jsonify({'insights': f"<p>Error generating insights: {str(e)}</p>"}), 500
