@@ -8,7 +8,7 @@ This is the Readme! There isn't much content here we **Budgeted** all of our tim
 ## Features
 ### Dashboard
 *All you need at a glance*
-![Alt text](readmeimages/budgetbuddy1.png)
+![Alt text](readmeimages/budgetbuddy1.png =250x)
 
 Tired of page after page to use the most basic features of a product? Our dashboard is compact and convenient, providing fast and easy insights, metrics and pretty visuals you want to see including unique, bite sized AI powered tips! 
 
