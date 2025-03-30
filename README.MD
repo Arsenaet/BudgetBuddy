@@ -6,21 +6,21 @@ This is the Readme! There isn't much content here we **Budgeted** all of our tim
 ## Features
 ### Dashboard
 *All you need at a glance*
-image and such goes here
+image
 
 Tired of page after page to use the most basic features of a product? Our dashboard is compact and convenient, providing fast and easy insights, metrics and pretty visuals you want to see including unique, bite sized AI powered tips! 
 
 ### Expenses
-another image and such goes here
+image
 
 Whether you're feeling nostaligic for spreadheets of old, or you need some more controls (probably cause you punched in 4000 instead of 40.00, lets be real), the expenses tab has got you covered, giving you a nice, neat, no-nonsense of what you've spent your hard earned cash and what you want to add to make your insights more powerful
 
 ### Insights
-insights image here
+image here
 
 If you like pretty graphs, youre gonna love the insights page! This page is dedicated to giving you the most comprehensive overview of your finances as well as how you spend your money as well as powerful tools to help you better spend your money
 
-notachatbot image here
+image here
 
 When it comes to cruncing knowledge, there's nothing better than leverageng the best number-crunching research finding inventions there is out there. Powered by perplexity's sonar AI, this AI will answer your questions one by one while taking into account all the data that you've provided BudgetBuddy to crunch the number so you dont have to, giving you some of the most well reaserched insights possible.
 
